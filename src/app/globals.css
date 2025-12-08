@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fafaf9;
+  --foreground: #1c1917;
+  --card: #ffffff;
+  --card-hover: #f5f5f4;
+  --border: #e7e5e4;
+  --muted: #78716c;
+  --accent: #ea580c;
+  --accent-light: #fed7aa;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+@layer components {
+  .card {
+    @apply bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-sm;
+  }
+
+  .card-hover {
+    @apply hover:bg-[var(--card-hover)] hover:border-stone-300 transition-all;
+  }
+
+  .score-bar {
+    @apply h-2 rounded-full bg-gradient-to-r;
+  }
+
+  .score-excellent {
+    @apply from-orange-500 to-orange-400;
+  }
+
+  .score-good {
+    @apply from-amber-500 to-amber-400;
+  }
+
+  .score-average {
+    @apply from-stone-400 to-stone-300;
+  }
+
+  .score-poor {
+    @apply from-stone-300 to-stone-200;
+  }
+
+  .stat-value {
+    @apply text-3xl font-bold font-mono text-stone-900;
+  }
+
+  .stat-label {
+    @apply text-sm text-[var(--muted)] uppercase tracking-wide;
+  }
+
+  .rank-badge {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold;
+  }
+
+  .rank-1 {
+    @apply bg-orange-100 text-orange-600;
+  }
+
+  .rank-2 {
+    @apply bg-stone-200 text-stone-600;
+  }
+
+  .rank-3 {
+    @apply bg-amber-100 text-amber-700;
+  }
+
+  .rank-other {
+    @apply bg-stone-100 text-stone-500;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d6d3d1;
+}
