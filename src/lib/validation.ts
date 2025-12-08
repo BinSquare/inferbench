@@ -89,9 +89,9 @@ const memorySchema = z.object({
 const hardwareSchema = z.object({
   os: z.string().min(1).max(100),
   arch: z.string().min(1).max(50),
-  gpus: z.array(gpuEntrySchema).max(100).nullable().optional(),
-  cpu: cpuSchema,
-  memory: memorySchema,
+  gpus: z.array(gpuEntrySchema).max(100).nullish(),
+  cpu: cpuSchema.nullish(),
+  memory: memorySchema.nullish(),
 })
 
 const latencySchema = z.object({

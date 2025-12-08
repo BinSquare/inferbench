@@ -114,14 +114,14 @@ export const submissions = pgTable('submissions', {
   totalVramMb: integer('total_vram_mb').default(0).notNull(),
   primaryGpuName: text('primary_gpu_name'), // For display purposes (first/main GPU)
 
-  // CPU (required)
-  cpuName: text('cpu_name').notNull(),
-  cpuVendor: text('cpu_vendor').notNull(),
-  cpuCores: integer('cpu_cores').notNull(),
-  cpuThreads: integer('cpu_threads').notNull(),
+  // CPU (optional - at least one GPU or CPU required)
+  cpuName: text('cpu_name'),
+  cpuVendor: text('cpu_vendor'),
+  cpuCores: integer('cpu_cores'),
+  cpuThreads: integer('cpu_threads'),
 
-  // RAM
-  ramMb: integer('ram_mb').notNull(),
+  // RAM (optional)
+  ramMb: integer('ram_mb'),
   ramSpeedMhz: integer('ram_speed_mhz'), // DDR speed
   ramType: text('ram_type'), // DDR4, DDR5, etc.
 

@@ -9,7 +9,8 @@ const gpuPriceMap = new Map(GPU_LIST.map(gpu => [gpu.name, gpu.msrp_usd]))
 const cpuPriceMap = new Map(CPU_LIST.map(cpu => [cpu.name, cpu.msrp_usd]))
 
 // Estimate RAM cost: ~$3/GB for DDR5, ~$2/GB for DDR4 (rough market average)
-function estimateRamCost(ramMb: number): number {
+function estimateRamCost(ramMb: number | null): number {
+  if (!ramMb) return 0
   const ramGb = ramMb / 1024
   const costPerGb = 3 // Assume DDR5 pricing
   return Math.round(ramGb * costPerGb)
@@ -17,7 +18,7 @@ function estimateRamCost(ramMb: number): number {
 
 // Check if this is a unified SoC (Apple Silicon or AMD Ryzen AI Max)
 // These have CPU+GPU on the same die, so we shouldn't double-count
-function isUnifiedSoC(gpuName: string | null, cpuName: string): boolean {
+function isUnifiedSoC(gpuName: string | null, cpuName: string | null): boolean {
   if (!gpuName) return false
   // Apple Silicon - GPU and CPU are the same chip
   if (gpuName.startsWith('Apple M')) return true
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest) {
 
       // Calculate component costs
       const gpuMsrp = sub.primaryGpuName ? gpuPriceMap.get(sub.primaryGpuName) : null
-      const cpuMsrp = cpuPriceMap.get(sub.cpuName)
+      const cpuMsrp = sub.cpuName ? cpuPriceMap.get(sub.cpuName) : null
 
       // For unified SoCs, RAM is included in the chip price (unified memory)
       // For discrete systems, estimate RAM cost separately

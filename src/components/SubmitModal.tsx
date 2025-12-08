@@ -10,13 +10,19 @@ interface SubmitModalProps {
   onClose: () => void
 }
 
+interface GpuEntry {
+  id: string
+  name: string
+  quantity: number
+}
+
 export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
+  const [gpuEntries, setGpuEntries] = useState<GpuEntry[]>([])
   const [formData, setFormData] = useState({
-    gpuName: '',
     cpuName: '',
     ramMb: '',
     os: 'linux',
@@ -35,27 +41,35 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
     return gpuName.startsWith('Apple M') || gpuName.startsWith('AMD Ryzen AI Max')
   }
 
-  // Get selected GPU/CPU specs automatically
-  const selectedGPU = useMemo(() =>
-    GPU_LIST.find(g => g.name === formData.gpuName),
-    [formData.gpuName]
-  )
+  // Check if any GPU is a unified SoC
+  const hasUnifiedSoC = useMemo(() => {
+    return gpuEntries.some(entry => isUnifiedSoC(entry.name))
+  }, [gpuEntries])
 
+  // Get the unified SoC name if present
+  const unifiedSoCName = useMemo(() => {
+    const socEntry = gpuEntries.find(entry => isUnifiedSoC(entry.name))
+    return socEntry?.name || null
+  }, [gpuEntries])
+
+  // Get selected CPU specs
   const selectedCPU = useMemo(() =>
     CPU_LIST.find(c => c.name === formData.cpuName),
     [formData.cpuName]
   )
 
+  // Validation: at least one GPU or CPU required
+  const hasHardware = gpuEntries.length > 0 || formData.cpuName !== ''
+
   // Auto-select matching CPU when unified SoC GPU is selected
   useEffect(() => {
-    if (formData.gpuName && isUnifiedSoC(formData.gpuName)) {
-      // For unified SoCs, the CPU name matches the GPU name
-      const matchingCpu = CPU_LIST.find(c => c.name === formData.gpuName)
-      if (matchingCpu && formData.cpuName !== formData.gpuName) {
-        setFormData(prev => ({ ...prev, cpuName: formData.gpuName }))
+    if (unifiedSoCName) {
+      const matchingCpu = CPU_LIST.find(c => c.name === unifiedSoCName)
+      if (matchingCpu && formData.cpuName !== unifiedSoCName) {
+        setFormData(prev => ({ ...prev, cpuName: unifiedSoCName }))
       }
     }
-  }, [formData.gpuName])
+  }, [unifiedSoCName])
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -83,31 +97,83 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
     return `${mb} MB`
   }
 
+  const addGpu = () => {
+    setGpuEntries(prev => [...prev, { id: crypto.randomUUID(), name: '', quantity: 1 }])
+  }
+
+  const removeGpu = (id: string) => {
+    setGpuEntries(prev => prev.filter(entry => entry.id !== id))
+  }
+
+  const updateGpu = (id: string, field: 'name' | 'quantity', value: string | number) => {
+    setGpuEntries(prev => prev.map(entry =>
+      entry.id === id ? { ...entry, [field]: value } : entry
+    ))
+  }
+
+  const resetForm = () => {
+    setGpuEntries([])
+    setFormData({
+      cpuName: '',
+      ramMb: '',
+      os: 'linux',
+      model: '',
+      backend: 'transformers',
+      tokensPerSecond: '',
+      timeToFirstToken: '',
+      latencyP50: '',
+      latencyP90: '',
+      latencyP99: '',
+      sourceUrl: '',
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!hasHardware) {
+      setSubmitError('Please select at least one GPU or CPU')
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitError(null)
+
+    // Build GPU array
+    const gpus = gpuEntries
+      .filter(entry => entry.name)
+      .map(entry => {
+        const gpuSpec = GPU_LIST.find(g => g.name === entry.name)
+        return gpuSpec ? {
+          name: gpuSpec.name,
+          vendor: gpuSpec.vendor as string,
+          vram_mb: gpuSpec.vram_mb,
+          quantity: entry.quantity,
+        } : null
+      })
+      .filter((gpu): gpu is NonNullable<typeof gpu> => gpu !== null)
+
+    // Build CPU object (optional)
+    const cpu = formData.cpuName ? {
+      model: selectedCPU?.name || formData.cpuName,
+      vendor: selectedCPU?.vendor || 'Unknown',
+      cores: selectedCPU?.cores || 1,
+      threads: selectedCPU?.threads || 1,
+      architecture: selectedCPU?.architecture || 'unknown',
+    } : null
+
+    // Build memory object (optional)
+    const memory = formData.ramMb ? {
+      total_mb: parseInt(formData.ramMb),
+    } : null
 
     const payload = {
       hardware: {
         os: formData.os,
         arch: 'x86_64',
-        gpus: selectedGPU ? [{
-          name: selectedGPU.name,
-          vendor: selectedGPU.vendor,
-          vram_mb: selectedGPU.vram_mb,
-          quantity: 1,
-        }] : null,
-        cpu: {
-          model: selectedCPU?.name || formData.cpuName,
-          vendor: selectedCPU?.vendor || 'Unknown',
-          cores: selectedCPU?.cores || 1,
-          threads: selectedCPU?.threads || 1,
-          architecture: 'x86_64',
-        },
-        memory: {
-          total_mb: parseInt(formData.ramMb) || 0,
-        },
+        gpus: gpus.length > 0 ? gpus : null,
+        cpu,
+        memory,
       },
       benchmark: {
         model: formData.model,
@@ -132,20 +198,7 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
       setTimeout(() => {
         onClose()
         setSubmitSuccess(false)
-        setFormData({
-          gpuName: '',
-          cpuName: '',
-          ramMb: '',
-          os: 'linux',
-          model: '',
-          backend: 'transformers',
-          tokensPerSecond: '',
-          timeToFirstToken: '',
-          latencyP50: '',
-          latencyP90: '',
-          latencyP99: '',
-          sourceUrl: '',
-        })
+        resetForm()
       }, 2000)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Submission failed')
@@ -211,43 +264,87 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
                   {/* Hardware Section */}
                   <div>
                     <h3 className="text-sm font-semibold text-stone-900 uppercase tracking-wide mb-4">Hardware</h3>
+                    <p className="text-xs text-stone-500 mb-4">At least one GPU or CPU is required.</p>
 
-                    {/* GPU Dropdown */}
+                    {/* GPU List */}
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-stone-700 mb-1">GPU</label>
-                      <select
-                        name="gpuName"
-                        value={formData.gpuName}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-stone-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
-                      >
-                        <option value="">No GPU / CPU Only</option>
-                        {Object.entries(gpusByVendor).map(([vendor, gpus]) => (
-                          <optgroup key={vendor} label={vendor}>
-                            {gpus.map(gpu => (
-                              <option key={gpu.name} value={gpu.name}>
-                                {gpu.name} ({formatVram(gpu.vram_mb)})
-                              </option>
-                            ))}
-                          </optgroup>
-                        ))}
-                      </select>
-                      {selectedGPU && (
-                        <div className="mt-2 text-xs text-stone-500 flex gap-4">
-                          <span>Vendor: <span className="font-medium text-stone-700">{selectedGPU.vendor}</span></span>
-                          <span>VRAM: <span className="font-medium text-stone-700">{formatVram(selectedGPU.vram_mb)}</span></span>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium text-stone-700">GPUs</label>
+                        <button
+                          type="button"
+                          onClick={addGpu}
+                          className="text-xs text-orange-600 hover:text-orange-700 font-medium"
+                        >
+                          + Add GPU
+                        </button>
+                      </div>
+
+                      {gpuEntries.length === 0 ? (
+                        <div className="text-sm text-stone-400 italic py-2">
+                          No GPUs added (CPU-only benchmark)
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {gpuEntries.map((entry) => {
+                            const gpuSpec = GPU_LIST.find(g => g.name === entry.name)
+                            return (
+                              <div key={entry.id} className="flex gap-2 items-start">
+                                <select
+                                  value={entry.name}
+                                  onChange={(e) => updateGpu(entry.id, 'name', e.target.value)}
+                                  className="flex-1 px-3 py-2 border border-stone-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                                >
+                                  <option value="">Select GPU...</option>
+                                  {Object.entries(gpusByVendor).map(([vendor, gpus]) => (
+                                    <optgroup key={vendor} label={vendor}>
+                                      {gpus.map(gpu => (
+                                        <option key={gpu.name} value={gpu.name}>
+                                          {gpu.name} ({formatVram(gpu.vram_mb)})
+                                        </option>
+                                      ))}
+                                    </optgroup>
+                                  ))}
+                                </select>
+                                <div className="w-20">
+                                  <select
+                                    value={entry.quantity}
+                                    onChange={(e) => updateGpu(entry.id, 'quantity', parseInt(e.target.value))}
+                                    className="w-full px-2 py-2 border border-stone-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                                  >
+                                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
+                                      <option key={n} value={n}>{n}x</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeGpu(entry.id)}
+                                  className="p-2 text-stone-400 hover:text-red-500 transition-colors"
+                                >
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                      {gpuEntries.length > 0 && gpuEntries.some(e => e.name) && (
+                        <div className="mt-2 text-xs text-stone-500">
+                          Total: {gpuEntries.filter(e => e.name).reduce((sum, e) => sum + e.quantity, 0)} GPU(s)
                         </div>
                       )}
                     </div>
 
                     {/* CPU Dropdown */}
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-stone-700 mb-1">CPU <span className="text-red-500">*</span></label>
-                      {formData.gpuName && isUnifiedSoC(formData.gpuName) ? (
+                      <label className="block text-sm font-medium text-stone-700 mb-1">CPU</label>
+                      {hasUnifiedSoC ? (
                         // Unified SoC - CPU is same as GPU, show as locked
                         <>
                           <div className="w-full px-3 py-2 border border-stone-200 rounded-md text-sm bg-stone-50 text-stone-700">
-                            {formData.gpuName}
+                            {unifiedSoCName}
                           </div>
                           <div className="mt-2 text-xs text-stone-500 italic">
                             Unified SoC - CPU is integrated with the selected chip
@@ -260,10 +357,9 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
                             name="cpuName"
                             value={formData.cpuName}
                             onChange={handleInputChange}
-                            required
                             className="w-full px-3 py-2 border border-stone-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
                           >
-                            <option value="">Select CPU...</option>
+                            <option value="">Select CPU (optional)...</option>
                             {Object.entries(cpusByVendor).map(([vendor, cpus]) => (
                               <optgroup key={vendor} label={vendor}>
                                 {cpus.map(cpu => (
@@ -288,15 +384,14 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
                     {/* RAM and OS */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-1">RAM <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-stone-700 mb-1">RAM</label>
                         <select
                           name="ramMb"
                           value={formData.ramMb}
                           onChange={handleInputChange}
-                          required
                           className="w-full px-3 py-2 border border-stone-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
                         >
-                          <option value="">Select RAM...</option>
+                          <option value="">Select RAM (optional)...</option>
                           {RAM_OPTIONS.map(ram => (
                             <option key={ram.value} value={ram.value}>
                               {ram.label}
@@ -320,6 +415,13 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
                         </select>
                       </div>
                     </div>
+
+                    {/* Validation warning */}
+                    {!hasHardware && (
+                      <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                        <p className="text-sm text-amber-700">Please add at least one GPU or select a CPU.</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Benchmark Section */}
@@ -468,7 +570,7 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
                     </button>
                     <button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !hasHardware}
                       className="px-6 py-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white text-sm font-medium rounded transition-colors"
                     >
                       {isSubmitting ? 'Submitting...' : 'Submit Result'}

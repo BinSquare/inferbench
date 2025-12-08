@@ -59,16 +59,16 @@ export async function POST(request: NextRequest) {
       totalVramMb,
       primaryGpuName,
 
-      // Hardware - CPU
-      cpuName: payload.hardware.cpu.model,
-      cpuVendor: payload.hardware.cpu.vendor,
-      cpuCores: payload.hardware.cpu.cores,
-      cpuThreads: payload.hardware.cpu.threads,
+      // Hardware - CPU (optional)
+      cpuName: payload.hardware.cpu?.model || null,
+      cpuVendor: payload.hardware.cpu?.vendor || null,
+      cpuCores: payload.hardware.cpu?.cores || null,
+      cpuThreads: payload.hardware.cpu?.threads || null,
 
-      // Hardware - RAM
-      ramMb: payload.hardware.memory.total_mb,
-      ramSpeedMhz: payload.hardware.memory.speed_mhz || null,
-      ramType: payload.hardware.memory.type || null,
+      // Hardware - RAM (optional)
+      ramMb: payload.hardware.memory?.total_mb || null,
+      ramSpeedMhz: payload.hardware.memory?.speed_mhz || null,
+      ramType: payload.hardware.memory?.type || null,
 
       // System
       os: payload.hardware.os,
@@ -121,8 +121,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update CPU stats
-    await upsertCpuStats(payload.hardware.cpu)
+    // Update CPU stats (if CPU provided)
+    if (payload.hardware.cpu) {
+      await upsertCpuStats(payload.hardware.cpu)
+    }
 
     // Update model stats
     await upsertModelStats(payload.benchmark.model, payload.benchmark.model_parameters_b ?? undefined)

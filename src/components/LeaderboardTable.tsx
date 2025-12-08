@@ -9,7 +9,8 @@ interface LeaderboardTableProps {
   isLoading?: boolean
 }
 
-function formatVram(mb: number): string {
+function formatVram(mb: number | null): string {
+  if (mb === null) return 'N/A'
   if (mb >= 1024) {
     return `${(mb / 1024).toFixed(mb % 1024 === 0 ? 0 : 1)} GB`
   }
@@ -213,7 +214,7 @@ export function LeaderboardTable({ entries, isLoading }: LeaderboardTableProps) 
                                     <span className="text-stone-900">{formatPrice(entry.cpu_msrp_usd)}</span>
                                   </div>
                                 )}
-                                {entry.ram_cost_usd > 0 && (
+                                {entry.ram_cost_usd > 0 && entry.ram_mb != null && (
                                   <div className="flex justify-between">
                                     <span className="text-stone-500">RAM ({formatVram(entry.ram_mb)}):</span>
                                     <span className="text-stone-900">~{formatPrice(entry.ram_cost_usd)}</span>

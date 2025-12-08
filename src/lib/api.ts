@@ -16,9 +16,9 @@ export interface LeaderboardEntry {
     interconnect: string | null
   }>
   // CPU info
-  cpu_name: string
+  cpu_name: string | null
   // RAM info
-  ram_mb: number
+  ram_mb: number | null
   // Benchmark config
   model: string
   model_parameters_b: number | null
@@ -291,16 +291,16 @@ export async function submitBenchmark(payload: {
       vram_mb: number
       quantity: number
     }> | null
-    cpu: {
+    cpu?: {
       model: string
       vendor: string
       cores: number
       threads: number
       architecture: string
-    }
-    memory: {
+    } | null
+    memory?: {
       total_mb: number
-    }
+    } | null
   }
   benchmark: {
     model: string
