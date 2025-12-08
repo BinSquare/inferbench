@@ -50,7 +50,7 @@ export default function Home() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-stone-900 mb-2">Inference Hardware Leaderboard</h1>
         <p className="text-stone-500">
-          All results are user-submitted and checked by unpaid volunteers. Help us improve this data by submitting and flagging suspicious submissions!
+          Community-submitted benchmark results for local LLM inference. Help improve data quality by submitting your results or flagging suspicious entries.
         </p>
       </div>
 
@@ -125,8 +125,8 @@ export default function Home() {
               About
             </h3>
             <p className="text-sm text-stone-500">
-              InferBench is a open and free enchmark database for LLM inference hardware.
-              All results are manually submitted by users and validated by volunteer users like yourself.
+              InferBench is an open, community-driven benchmark database for LLM inference hardware.
+              All results are submitted by users and validated by the community.
             </p>
           </div>
         </div>

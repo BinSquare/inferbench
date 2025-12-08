@@ -122,8 +122,8 @@ export default function GPUsPage() {
                   </td>
                   {sortBy === 'value' && (
                     <td className="px-6 py-4 font-mono font-semibold text-green-600">
-                      {gpu.value_score ? `${formatNumber(gpu.value_score, 1)}` : '-'}
-                      {gpu.value_score && <span className="text-xs text-stone-400 ml-1">tok/s/$k</span>}
+                      {gpu.value_score ? `${formatNumber(gpu.value_score, 3)}` : '-'}
+                      {gpu.value_score && <span className="text-xs text-stone-400 ml-1">tok/s/$</span>}
                     </td>
                   )}
                 </tr>
