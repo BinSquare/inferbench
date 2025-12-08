@@ -269,11 +269,20 @@ export const RAM_SPEED_OPTIONS = [
 ]
 
 export const MODEL_LIST: ModelSpec[] = [
+  // OpenAI GPT-OSS (Open Source)
+  { name: 'openai/gpt-oss-120b', displayName: 'GPT-OSS 120B', vendor: 'OpenAI', parameters_b: 117, context_length: 128000 },
+  { name: 'openai/gpt-oss-20b', displayName: 'GPT-OSS 20B', vendor: 'OpenAI', parameters_b: 21, context_length: 128000 },
+
+  // Llama 3.3 (December 2024)
+  { name: 'meta-llama/Llama-3.3-70B-Instruct', displayName: 'Llama 3.3 70B Instruct', vendor: 'Meta', parameters_b: 70, context_length: 128000 },
+
   // Llama 3.2
   { name: 'meta-llama/Llama-3.2-1B', displayName: 'Llama 3.2 1B', vendor: 'Meta', parameters_b: 1, context_length: 128000 },
   { name: 'meta-llama/Llama-3.2-3B', displayName: 'Llama 3.2 3B', vendor: 'Meta', parameters_b: 3, context_length: 128000 },
   { name: 'meta-llama/Llama-3.2-1B-Instruct', displayName: 'Llama 3.2 1B Instruct', vendor: 'Meta', parameters_b: 1, context_length: 128000 },
   { name: 'meta-llama/Llama-3.2-3B-Instruct', displayName: 'Llama 3.2 3B Instruct', vendor: 'Meta', parameters_b: 3, context_length: 128000 },
+  { name: 'meta-llama/Llama-3.2-11B-Vision-Instruct', displayName: 'Llama 3.2 11B Vision', vendor: 'Meta', parameters_b: 11, context_length: 128000 },
+  { name: 'meta-llama/Llama-3.2-90B-Vision-Instruct', displayName: 'Llama 3.2 90B Vision', vendor: 'Meta', parameters_b: 90, context_length: 128000 },
 
   // Llama 3.1
   { name: 'meta-llama/Llama-3.1-8B', displayName: 'Llama 3.1 8B', vendor: 'Meta', parameters_b: 8, context_length: 128000 },
@@ -283,67 +292,83 @@ export const MODEL_LIST: ModelSpec[] = [
   { name: 'meta-llama/Llama-3.1-405B', displayName: 'Llama 3.1 405B', vendor: 'Meta', parameters_b: 405, context_length: 128000 },
   { name: 'meta-llama/Llama-3.1-405B-Instruct', displayName: 'Llama 3.1 405B Instruct', vendor: 'Meta', parameters_b: 405, context_length: 128000 },
 
-  // Llama 3
-  { name: 'meta-llama/Meta-Llama-3-8B', displayName: 'Llama 3 8B', vendor: 'Meta', parameters_b: 8, context_length: 8192 },
-  { name: 'meta-llama/Meta-Llama-3-8B-Instruct', displayName: 'Llama 3 8B Instruct', vendor: 'Meta', parameters_b: 8, context_length: 8192 },
-  { name: 'meta-llama/Meta-Llama-3-70B', displayName: 'Llama 3 70B', vendor: 'Meta', parameters_b: 70, context_length: 8192 },
-  { name: 'meta-llama/Meta-Llama-3-70B-Instruct', displayName: 'Llama 3 70B Instruct', vendor: 'Meta', parameters_b: 70, context_length: 8192 },
-
-  // Mistral
-  { name: 'mistralai/Mistral-7B-v0.3', displayName: 'Mistral 7B v0.3', vendor: 'Mistral', parameters_b: 7, context_length: 32768 },
-  { name: 'mistralai/Mistral-7B-Instruct-v0.3', displayName: 'Mistral 7B Instruct v0.3', vendor: 'Mistral', parameters_b: 7, context_length: 32768 },
-  { name: 'mistralai/Mixtral-8x7B-v0.1', displayName: 'Mixtral 8x7B', vendor: 'Mistral', parameters_b: 47, context_length: 32768 },
-  { name: 'mistralai/Mixtral-8x7B-Instruct-v0.1', displayName: 'Mixtral 8x7B Instruct', vendor: 'Mistral', parameters_b: 47, context_length: 32768 },
-  { name: 'mistralai/Mixtral-8x22B-v0.1', displayName: 'Mixtral 8x22B', vendor: 'Mistral', parameters_b: 141, context_length: 65536 },
-  { name: 'mistralai/Mistral-Large-Instruct-2407', displayName: 'Mistral Large', vendor: 'Mistral', parameters_b: 123, context_length: 128000 },
-
-  // Qwen 2.5
-  { name: 'Qwen/Qwen2.5-0.5B', displayName: 'Qwen 2.5 0.5B', vendor: 'Alibaba', parameters_b: 0.5, context_length: 32768 },
-  { name: 'Qwen/Qwen2.5-1.5B', displayName: 'Qwen 2.5 1.5B', vendor: 'Alibaba', parameters_b: 1.5, context_length: 32768 },
-  { name: 'Qwen/Qwen2.5-3B', displayName: 'Qwen 2.5 3B', vendor: 'Alibaba', parameters_b: 3, context_length: 32768 },
-  { name: 'Qwen/Qwen2.5-7B', displayName: 'Qwen 2.5 7B', vendor: 'Alibaba', parameters_b: 7, context_length: 32768 },
-  { name: 'Qwen/Qwen2.5-14B', displayName: 'Qwen 2.5 14B', vendor: 'Alibaba', parameters_b: 14, context_length: 32768 },
-  { name: 'Qwen/Qwen2.5-32B', displayName: 'Qwen 2.5 32B', vendor: 'Alibaba', parameters_b: 32, context_length: 32768 },
-  { name: 'Qwen/Qwen2.5-72B', displayName: 'Qwen 2.5 72B', vendor: 'Alibaba', parameters_b: 72, context_length: 32768 },
-  { name: 'Qwen/Qwen2.5-7B-Instruct', displayName: 'Qwen 2.5 7B Instruct', vendor: 'Alibaba', parameters_b: 7, context_length: 32768 },
-  { name: 'Qwen/Qwen2.5-72B-Instruct', displayName: 'Qwen 2.5 72B Instruct', vendor: 'Alibaba', parameters_b: 72, context_length: 32768 },
-
-  // Phi
-  { name: 'microsoft/phi-3-mini-4k-instruct', displayName: 'Phi-3 Mini 4K', vendor: 'Microsoft', parameters_b: 3.8, context_length: 4096 },
-  { name: 'microsoft/phi-3-small-8k-instruct', displayName: 'Phi-3 Small 8K', vendor: 'Microsoft', parameters_b: 7, context_length: 8192 },
-  { name: 'microsoft/phi-3-medium-4k-instruct', displayName: 'Phi-3 Medium 4K', vendor: 'Microsoft', parameters_b: 14, context_length: 4096 },
-  { name: 'microsoft/Phi-3.5-mini-instruct', displayName: 'Phi-3.5 Mini', vendor: 'Microsoft', parameters_b: 3.8, context_length: 128000 },
-
-  // Gemma
-  { name: 'google/gemma-2-2b', displayName: 'Gemma 2 2B', vendor: 'Google', parameters_b: 2, context_length: 8192 },
-  { name: 'google/gemma-2-9b', displayName: 'Gemma 2 9B', vendor: 'Google', parameters_b: 9, context_length: 8192 },
-  { name: 'google/gemma-2-27b', displayName: 'Gemma 2 27B', vendor: 'Google', parameters_b: 27, context_length: 8192 },
-  { name: 'google/gemma-2-2b-it', displayName: 'Gemma 2 2B Instruct', vendor: 'Google', parameters_b: 2, context_length: 8192 },
-  { name: 'google/gemma-2-9b-it', displayName: 'Gemma 2 9B Instruct', vendor: 'Google', parameters_b: 9, context_length: 8192 },
-  { name: 'google/gemma-2-27b-it', displayName: 'Gemma 2 27B Instruct', vendor: 'Google', parameters_b: 27, context_length: 8192 },
-
-  // DeepSeek
-  { name: 'deepseek-ai/deepseek-llm-7b-base', displayName: 'DeepSeek 7B', vendor: 'DeepSeek', parameters_b: 7, context_length: 4096 },
-  { name: 'deepseek-ai/deepseek-llm-67b-base', displayName: 'DeepSeek 67B', vendor: 'DeepSeek', parameters_b: 67, context_length: 4096 },
-  { name: 'deepseek-ai/deepseek-coder-6.7b-base', displayName: 'DeepSeek Coder 6.7B', vendor: 'DeepSeek', parameters_b: 6.7, context_length: 16384 },
-  { name: 'deepseek-ai/deepseek-coder-33b-base', displayName: 'DeepSeek Coder 33B', vendor: 'DeepSeek', parameters_b: 33, context_length: 16384 },
-  { name: 'deepseek-ai/DeepSeek-V2', displayName: 'DeepSeek V2', vendor: 'DeepSeek', parameters_b: 236, context_length: 128000 },
+  // DeepSeek V3 (December 2024)
+  { name: 'deepseek-ai/DeepSeek-V3', displayName: 'DeepSeek V3', vendor: 'DeepSeek', parameters_b: 671, context_length: 128000 },
   { name: 'deepseek-ai/DeepSeek-V2.5', displayName: 'DeepSeek V2.5', vendor: 'DeepSeek', parameters_b: 236, context_length: 128000 },
+  { name: 'deepseek-ai/DeepSeek-V2', displayName: 'DeepSeek V2', vendor: 'DeepSeek', parameters_b: 236, context_length: 128000 },
+  { name: 'deepseek-ai/deepseek-llm-67b-chat', displayName: 'DeepSeek 67B Chat', vendor: 'DeepSeek', parameters_b: 67, context_length: 4096 },
+  { name: 'deepseek-ai/deepseek-coder-33b-instruct', displayName: 'DeepSeek Coder 33B', vendor: 'DeepSeek', parameters_b: 33, context_length: 16384 },
+  { name: 'deepseek-ai/deepseek-coder-6.7b-instruct', displayName: 'DeepSeek Coder 6.7B', vendor: 'DeepSeek', parameters_b: 6.7, context_length: 16384 },
 
-  // Yi
-  { name: '01-ai/Yi-1.5-6B', displayName: 'Yi 1.5 6B', vendor: '01.AI', parameters_b: 6, context_length: 4096 },
-  { name: '01-ai/Yi-1.5-9B', displayName: 'Yi 1.5 9B', vendor: '01.AI', parameters_b: 9, context_length: 4096 },
-  { name: '01-ai/Yi-1.5-34B', displayName: 'Yi 1.5 34B', vendor: '01.AI', parameters_b: 34, context_length: 4096 },
+  // Qwen 2.5 (including Coder)
+  { name: 'Qwen/Qwen2.5-72B-Instruct', displayName: 'Qwen 2.5 72B Instruct', vendor: 'Alibaba', parameters_b: 72, context_length: 131072 },
+  { name: 'Qwen/Qwen2.5-32B-Instruct', displayName: 'Qwen 2.5 32B Instruct', vendor: 'Alibaba', parameters_b: 32, context_length: 131072 },
+  { name: 'Qwen/Qwen2.5-14B-Instruct', displayName: 'Qwen 2.5 14B Instruct', vendor: 'Alibaba', parameters_b: 14, context_length: 131072 },
+  { name: 'Qwen/Qwen2.5-7B-Instruct', displayName: 'Qwen 2.5 7B Instruct', vendor: 'Alibaba', parameters_b: 7, context_length: 131072 },
+  { name: 'Qwen/Qwen2.5-3B-Instruct', displayName: 'Qwen 2.5 3B Instruct', vendor: 'Alibaba', parameters_b: 3, context_length: 32768 },
+  { name: 'Qwen/Qwen2.5-1.5B-Instruct', displayName: 'Qwen 2.5 1.5B Instruct', vendor: 'Alibaba', parameters_b: 1.5, context_length: 32768 },
+  { name: 'Qwen/Qwen2.5-0.5B-Instruct', displayName: 'Qwen 2.5 0.5B Instruct', vendor: 'Alibaba', parameters_b: 0.5, context_length: 32768 },
+  { name: 'Qwen/Qwen2.5-Coder-32B-Instruct', displayName: 'Qwen 2.5 Coder 32B', vendor: 'Alibaba', parameters_b: 32, context_length: 131072 },
+  { name: 'Qwen/Qwen2.5-Coder-14B-Instruct', displayName: 'Qwen 2.5 Coder 14B', vendor: 'Alibaba', parameters_b: 14, context_length: 131072 },
+  { name: 'Qwen/Qwen2.5-Coder-7B-Instruct', displayName: 'Qwen 2.5 Coder 7B', vendor: 'Alibaba', parameters_b: 7, context_length: 131072 },
+  { name: 'Qwen/Qwen2.5-Coder-3B-Instruct', displayName: 'Qwen 2.5 Coder 3B', vendor: 'Alibaba', parameters_b: 3, context_length: 32768 },
+  { name: 'Qwen/Qwen2.5-Coder-1.5B-Instruct', displayName: 'Qwen 2.5 Coder 1.5B', vendor: 'Alibaba', parameters_b: 1.5, context_length: 32768 },
+  { name: 'Qwen/QwQ-32B-Preview', displayName: 'QwQ 32B Preview', vendor: 'Alibaba', parameters_b: 32, context_length: 32768 },
 
-  // Falcon
-  { name: 'tiiuae/falcon-7b', displayName: 'Falcon 7B', vendor: 'TII', parameters_b: 7, context_length: 2048 },
-  { name: 'tiiuae/falcon-40b', displayName: 'Falcon 40B', vendor: 'TII', parameters_b: 40, context_length: 2048 },
-  { name: 'tiiuae/falcon-180B', displayName: 'Falcon 180B', vendor: 'TII', parameters_b: 180, context_length: 2048 },
+  // Mistral (2024)
+  { name: 'mistralai/Mistral-Large-Instruct-2411', displayName: 'Mistral Large 2411', vendor: 'Mistral', parameters_b: 123, context_length: 128000 },
+  { name: 'mistralai/Mistral-Small-Instruct-2409', displayName: 'Mistral Small 2409', vendor: 'Mistral', parameters_b: 22, context_length: 32768 },
+  { name: 'mistralai/Pixtral-12B-2409', displayName: 'Pixtral 12B', vendor: 'Mistral', parameters_b: 12, context_length: 128000 },
+  { name: 'mistralai/Mistral-Nemo-Instruct-2407', displayName: 'Mistral Nemo 12B', vendor: 'Mistral', parameters_b: 12, context_length: 128000 },
+  { name: 'mistralai/Codestral-22B-v0.1', displayName: 'Codestral 22B', vendor: 'Mistral', parameters_b: 22, context_length: 32768 },
+  { name: 'mistralai/Mixtral-8x22B-Instruct-v0.1', displayName: 'Mixtral 8x22B Instruct', vendor: 'Mistral', parameters_b: 141, context_length: 65536 },
+  { name: 'mistralai/Mixtral-8x7B-Instruct-v0.1', displayName: 'Mixtral 8x7B Instruct', vendor: 'Mistral', parameters_b: 47, context_length: 32768 },
+  { name: 'mistralai/Mistral-7B-Instruct-v0.3', displayName: 'Mistral 7B Instruct v0.3', vendor: 'Mistral', parameters_b: 7, context_length: 32768 },
+
+  // Phi-4 (December 2024)
+  { name: 'microsoft/phi-4', displayName: 'Phi-4', vendor: 'Microsoft', parameters_b: 14, context_length: 16384 },
+  { name: 'microsoft/Phi-3.5-mini-instruct', displayName: 'Phi-3.5 Mini', vendor: 'Microsoft', parameters_b: 3.8, context_length: 128000 },
+  { name: 'microsoft/Phi-3.5-MoE-instruct', displayName: 'Phi-3.5 MoE', vendor: 'Microsoft', parameters_b: 42, context_length: 128000 },
+  { name: 'microsoft/phi-3-medium-128k-instruct', displayName: 'Phi-3 Medium 128K', vendor: 'Microsoft', parameters_b: 14, context_length: 128000 },
+  { name: 'microsoft/phi-3-mini-128k-instruct', displayName: 'Phi-3 Mini 128K', vendor: 'Microsoft', parameters_b: 3.8, context_length: 128000 },
+
+  // Gemma 2
+  { name: 'google/gemma-2-27b-it', displayName: 'Gemma 2 27B Instruct', vendor: 'Google', parameters_b: 27, context_length: 8192 },
+  { name: 'google/gemma-2-9b-it', displayName: 'Gemma 2 9B Instruct', vendor: 'Google', parameters_b: 9, context_length: 8192 },
+  { name: 'google/gemma-2-2b-it', displayName: 'Gemma 2 2B Instruct', vendor: 'Google', parameters_b: 2, context_length: 8192 },
+
+  // Cohere Command R
+  { name: 'CohereForAI/c4ai-command-r-plus-08-2024', displayName: 'Command R+ (Aug 2024)', vendor: 'Cohere', parameters_b: 104, context_length: 128000 },
+  { name: 'CohereForAI/c4ai-command-r-08-2024', displayName: 'Command R (Aug 2024)', vendor: 'Cohere', parameters_b: 35, context_length: 128000 },
+
+  // SmolLM2 (Hugging Face)
+  { name: 'HuggingFaceTB/SmolLM2-1.7B-Instruct', displayName: 'SmolLM2 1.7B', vendor: 'Hugging Face', parameters_b: 1.7, context_length: 8192 },
+  { name: 'HuggingFaceTB/SmolLM2-360M-Instruct', displayName: 'SmolLM2 360M', vendor: 'Hugging Face', parameters_b: 0.36, context_length: 8192 },
+  { name: 'HuggingFaceTB/SmolLM2-135M-Instruct', displayName: 'SmolLM2 135M', vendor: 'Hugging Face', parameters_b: 0.135, context_length: 8192 },
+
+  // OLMo 2 (AI2)
+  { name: 'allenai/OLMo-2-1124-13B-Instruct', displayName: 'OLMo 2 13B', vendor: 'AI2', parameters_b: 13, context_length: 4096 },
+  { name: 'allenai/OLMo-2-1124-7B-Instruct', displayName: 'OLMo 2 7B', vendor: 'AI2', parameters_b: 7, context_length: 4096 },
+
+  // Yi (01.AI)
+  { name: '01-ai/Yi-1.5-34B-Chat', displayName: 'Yi 1.5 34B Chat', vendor: '01.AI', parameters_b: 34, context_length: 4096 },
+  { name: '01-ai/Yi-1.5-9B-Chat', displayName: 'Yi 1.5 9B Chat', vendor: '01.AI', parameters_b: 9, context_length: 4096 },
+  { name: '01-ai/Yi-1.5-6B-Chat', displayName: 'Yi 1.5 6B Chat', vendor: '01.AI', parameters_b: 6, context_length: 4096 },
+
+  // Falcon (TII)
+  { name: 'tiiuae/Falcon3-10B-Instruct', displayName: 'Falcon 3 10B', vendor: 'TII', parameters_b: 10, context_length: 32768 },
+  { name: 'tiiuae/Falcon3-7B-Instruct', displayName: 'Falcon 3 7B', vendor: 'TII', parameters_b: 7, context_length: 32768 },
+  { name: 'tiiuae/Falcon3-3B-Instruct', displayName: 'Falcon 3 3B', vendor: 'TII', parameters_b: 3, context_length: 32768 },
+  { name: 'tiiuae/Falcon3-1B-Instruct', displayName: 'Falcon 3 1B', vendor: 'TII', parameters_b: 1, context_length: 32768 },
 
   // StarCoder
-  { name: 'bigcode/starcoder2-3b', displayName: 'StarCoder2 3B', vendor: 'BigCode', parameters_b: 3, context_length: 16384 },
+  { name: 'bigcode/starcoder2-15b-instruct-v0.1', displayName: 'StarCoder2 15B Instruct', vendor: 'BigCode', parameters_b: 15, context_length: 16384 },
   { name: 'bigcode/starcoder2-7b', displayName: 'StarCoder2 7B', vendor: 'BigCode', parameters_b: 7, context_length: 16384 },
-  { name: 'bigcode/starcoder2-15b', displayName: 'StarCoder2 15B', vendor: 'BigCode', parameters_b: 15, context_length: 16384 },
+  { name: 'bigcode/starcoder2-3b', displayName: 'StarCoder2 3B', vendor: 'BigCode', parameters_b: 3, context_length: 16384 },
+
+  // Llama 3 (legacy)
+  { name: 'meta-llama/Meta-Llama-3-70B-Instruct', displayName: 'Llama 3 70B Instruct', vendor: 'Meta', parameters_b: 70, context_length: 8192 },
+  { name: 'meta-llama/Meta-Llama-3-8B-Instruct', displayName: 'Llama 3 8B Instruct', vendor: 'Meta', parameters_b: 8, context_length: 8192 },
 ]
 
 export const QUANTIZATION_OPTIONS = [

@@ -69,7 +69,7 @@ const gpuEntrySchema = z.object({
   vendor: z.string().min(1).max(100),
   vram_mb: z.number().int().min(0).max(10000000), // Up to 10TB VRAM
   quantity: z.number().int().min(1).max(1000), // Up to 1000 GPUs (datacenter)
-  interconnect: z.string().max(50).optional(),
+  interconnect: z.string().max(50).nullish(),
 })
 
 const cpuSchema = z.object({
@@ -77,13 +77,13 @@ const cpuSchema = z.object({
   vendor: z.string().min(1).max(100),
   cores: z.number().int().min(1).max(10000),
   threads: z.number().int().min(1).max(100000),
-  architecture: z.string().max(50).optional(),
+  architecture: z.string().max(50).nullish(),
 })
 
 const memorySchema = z.object({
   total_mb: z.number().int().min(1).max(100000000), // Up to 100TB RAM
-  speed_mhz: z.number().int().min(100).max(100000).optional(),
-  type: z.string().max(20).optional(), // DDR4, DDR5, etc.
+  speed_mhz: z.number().int().min(100).max(100000).nullish(),
+  type: z.string().max(20).nullish(), // DDR4, DDR5, etc.
 })
 
 const hardwareSchema = z.object({
@@ -95,44 +95,44 @@ const hardwareSchema = z.object({
 })
 
 const latencySchema = z.object({
-  p50_ms: z.number().min(0).max(1000000).nullable().optional(),
-  p90_ms: z.number().min(0).max(1000000).nullable().optional(),
-  p99_ms: z.number().min(0).max(1000000).nullable().optional(),
+  p50_ms: z.number().min(0).max(1000000).nullish(),
+  p90_ms: z.number().min(0).max(1000000).nullish(),
+  p99_ms: z.number().min(0).max(1000000).nullish(),
 })
 
 const benchmarkSchema = z.object({
   model: z.string().min(1).max(300),
-  model_parameters_b: z.number().min(0).max(10000).optional(), // Up to 10T params
-  quantization: z.string().max(50).optional(),
-  context_length: z.number().int().min(1).max(10000000).optional(),
+  model_parameters_b: z.number().min(0).max(10000).nullish(), // Up to 10T params
+  quantization: z.string().max(50).nullish(),
+  context_length: z.number().int().min(1).max(10000000).nullish(),
   backend: z.string().min(1).max(100),
-  backend_version: z.string().max(50).optional(),
-  prompt_tokens: z.number().int().min(0).max(100000000).optional(),
-  generation_tokens: z.number().int().min(0).max(100000000).optional(),
-  batch_size: z.number().int().min(1).max(10000).optional(),
+  backend_version: z.string().max(50).nullish(),
+  prompt_tokens: z.number().int().min(0).max(100000000).nullish(),
+  generation_tokens: z.number().int().min(0).max(100000000).nullish(),
+  batch_size: z.number().int().min(1).max(10000).nullish(),
 })
 
 const resultsSchema = z.object({
   tokens_per_second: z.number().min(0.001).max(1000000), // Reasonable TPS range
-  prefill_tokens_per_second: z.number().min(0).max(100000000).optional(),
-  time_to_first_token_ms: z.number().min(0).max(10000000).optional(),
-  latency: latencySchema.optional(),
-  vram_used_mb: z.number().int().min(0).max(10000000).optional(),
-  ram_used_mb: z.number().int().min(0).max(100000000).optional(),
-  power_draw_watts: z.number().min(0).max(100000).optional(),
-  score: z.number().min(0).max(100).optional(),
+  prefill_tokens_per_second: z.number().min(0).max(100000000).nullish(),
+  time_to_first_token_ms: z.number().min(0).max(10000000).nullish(),
+  latency: latencySchema.nullish(),
+  vram_used_mb: z.number().int().min(0).max(10000000).nullish(),
+  ram_used_mb: z.number().int().min(0).max(100000000).nullish(),
+  power_draw_watts: z.number().min(0).max(100000).nullish(),
+  score: z.number().min(0).max(100).nullish(),
 })
 
 const metadataSchema = z.object({
-  notes: z.string().max(5000).optional(),
+  notes: z.string().max(5000).nullish(),
 })
 
 export const submissionPayloadSchema = z.object({
   hardware: hardwareSchema,
   benchmark: benchmarkSchema,
   results: resultsSchema,
-  metadata: metadataSchema.optional(),
-  source_url: z.string().url().max(2000).nullable().optional(),
+  metadata: metadataSchema.nullish(),
+  source_url: z.string().url().max(2000).nullish(),
 })
 
 export type SubmissionPayload = z.infer<typeof submissionPayloadSchema>

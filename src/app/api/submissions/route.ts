@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     await upsertCpuStats(payload.hardware.cpu)
 
     // Update model stats
-    await upsertModelStats(payload.benchmark.model, payload.benchmark.model_parameters_b)
+    await upsertModelStats(payload.benchmark.model, payload.benchmark.model_parameters_b ?? undefined)
 
     return NextResponse.json({
       success: true,
