@@ -1,6 +1,8 @@
 # InferBench
 
-Community benchmark database for local LLM inference.
+User-contributed and user-verified database on hardware performance for inference.
+
+Please contribute!
 
 ## Quick Start
 
