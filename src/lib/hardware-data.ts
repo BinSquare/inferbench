@@ -76,6 +76,8 @@ export const GPU_LIST: GPUSpec[] = [
   { name: 'NVIDIA L40S', vendor: 'NVIDIA', vram_mb: 49152, memory_bandwidth_gbps: 864, tdp_watts: 350, architecture: 'Ada Lovelace', msrp_usd: 8000 },
   { name: 'NVIDIA L40', vendor: 'NVIDIA', vram_mb: 49152, memory_bandwidth_gbps: 864, tdp_watts: 300, architecture: 'Ada Lovelace', msrp_usd: 7000 },
   { name: 'NVIDIA L4', vendor: 'NVIDIA', vram_mb: 24576, memory_bandwidth_gbps: 300, tdp_watts: 72, architecture: 'Ada Lovelace', msrp_usd: 2500 },
+  { name: 'NVIDIA RTX Pro 6000', vendor: 'NVIDIA', vram_mb: 98304, memory_bandwidth_gbps: 1792, tdp_watts: 350, architecture: 'Blackwell', msrp_usd: 8000 },
+  { name: 'NVIDIA RTX PRO 6000 Workstation', vendor: 'NVIDIA', vram_mb: 98304, memory_bandwidth_gbps: 1792, tdp_watts: 350, architecture: 'Blackwell', msrp_usd: 8000 },
 
   // AMD - Ryzen AI Max (Strix Halo APU - Unified Memory)
   { name: 'AMD Ryzen AI Max+ 395', vendor: 'AMD', vram_mb: 131072, memory_bandwidth_gbps: 256, tdp_watts: 120, architecture: 'RDNA 3.5', msrp_usd: 2999 },
@@ -199,6 +201,7 @@ export const CPU_LIST: CPUSpec[] = [
   // AMD - EPYC
   { name: 'AMD EPYC 9654', vendor: 'AMD', cores: 96, threads: 192, base_clock_mhz: 2400, boost_clock_mhz: 3700, l3_cache_mb: 384, tdp_watts: 360, architecture: 'Zen 4', msrp_usd: 11805 },
   { name: 'AMD EPYC 9554', vendor: 'AMD', cores: 64, threads: 128, base_clock_mhz: 3100, boost_clock_mhz: 3750, l3_cache_mb: 256, tdp_watts: 360, architecture: 'Zen 4', msrp_usd: 4558 },
+  { name: 'AMD EPYC 9455P', vendor: 'AMD', cores: 48, threads: 96, base_clock_mhz: 2550, boost_clock_mhz: 3450, l3_cache_mb: 256, tdp_watts: 270, architecture: 'Zen 4', msrp_usd: 2375 },
   { name: 'AMD EPYC 9454', vendor: 'AMD', cores: 48, threads: 96, base_clock_mhz: 2750, boost_clock_mhz: 3650, l3_cache_mb: 256, tdp_watts: 290, architecture: 'Zen 4', msrp_usd: 3411 },
   { name: 'AMD EPYC 9354', vendor: 'AMD', cores: 32, threads: 64, base_clock_mhz: 3250, boost_clock_mhz: 3800, l3_cache_mb: 256, tdp_watts: 280, architecture: 'Zen 4', msrp_usd: 2730 },
 
