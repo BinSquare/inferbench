@@ -1,7 +1,12 @@
-import { db, models } from '@/db'
-import { desc, eq, count } from 'drizzle-orm'
+import { db, submissions } from '@/db'
+import { sql } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
 import { parsePaginationParams } from '@/lib/validation'
+import { MODEL_LIST } from '@/lib/hardware-data'
+
+// Create lookup maps from hardware data
+const modelParamsMap = new Map(MODEL_LIST.map(m => [m.name, m.parameters_b]))
+const modelContextMap = new Map(MODEL_LIST.map(m => [m.name, m.context_length]))
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,42 +15,52 @@ export async function GET(request: NextRequest) {
     const vendor = searchParams.get('vendor')
     const { limit, offset } = parsePaginationParams(searchParams)
 
-    let data
+    // Compute model stats directly from submissions table
+    const modelStats = await db
+      .select({
+        model: submissions.model,
+        submissionCount: sql<number>`count(*)::int`,
+        avgTokensPerSecond: sql<number>`avg(${submissions.tokensPerSecond})`,
+        avgParametersB: sql<number>`avg(${submissions.modelParametersB})`,
+      })
+      .from(submissions)
+      .groupBy(submissions.model)
+
+    // Build entries with all model info
+    let entries = modelStats.map((stat) => {
+      const modelName = stat.model
+      const displayName = modelName.split('/').pop()?.replace(/-/g, ' ') || modelName
+      const modelVendor = modelName.split('/')[0] || 'Unknown'
+      const avgTps = Number(stat.avgTokensPerSecond) || 0
+
+      // Get parameters from lookup or from submissions average
+      const parametersB = modelParamsMap.get(modelName) || Number(stat.avgParametersB) || null
+      const contextLength = modelContextMap.get(modelName) || null
+
+      return {
+        name: modelName,
+        display_name: displayName,
+        vendor: modelVendor,
+        parameters_b: parametersB,
+        context_length: contextLength,
+        submission_count: stat.submissionCount,
+        avg_tokens_per_second: Math.round(avgTps * 100) / 100,
+      }
+    })
+
+    // Filter by vendor if specified
     if (vendor) {
-      data = await db
-        .select()
-        .from(models)
-        .where(eq(models.vendor, vendor))
-        .orderBy(desc(models.avgTokensPerSecond))
-        .limit(limit)
-        .offset(offset)
-    } else {
-      data = await db
-        .select()
-        .from(models)
-        .orderBy(desc(models.avgTokensPerSecond))
-        .limit(limit)
-        .offset(offset)
+      entries = entries.filter(e => e.vendor === vendor)
     }
 
-    // Get total count for percentile calculation
-    const [countResult] = await db
-      .select({ count: count() })
-      .from(models)
+    const totalModels = entries.length || 1
 
-    const totalModels = Number(countResult?.count) || data.length || 1
+    // Sort by avg tokens per second descending
+    entries.sort((a, b) => b.avg_tokens_per_second - a.avg_tokens_per_second)
 
-    // Add rank and percentile to each entry
-    const entries = data.map((model, index) => ({
-      id: model.id,
-      name: model.name,
-      display_name: model.displayName,
-      vendor: model.vendor,
-      parameters_b: model.parametersB,
-      context_length: model.contextLength,
-      huggingface_url: model.huggingfaceUrl,
-      submission_count: model.submissionCount,
-      avg_tokens_per_second: model.avgTokensPerSecond,
+    // Apply pagination and add ranks
+    entries = entries.slice(offset, offset + limit).map((entry, index) => ({
+      ...entry,
       rank: offset + index + 1,
       percentile: Math.round(((totalModels - (offset + index + 1)) / totalModels) * 100),
     }))

@@ -1,9 +1,7 @@
-import { db, submissions, submissionGpus, gpus, cpus, models } from '@/db'
-import { eq, avg, count } from 'drizzle-orm'
+import { db, submissions, submissionGpus } from '@/db'
 import { NextRequest, NextResponse } from 'next/server'
 import {
   submissionPayloadSchema,
-  type SubmissionPayload,
   validateRequestBody,
 } from '@/lib/validation'
 
@@ -114,20 +112,7 @@ export async function POST(request: NextRequest) {
           interconnect: gpu.interconnect || null,
         }))
       )
-
-      // Update GPU stats for each unique GPU
-      for (const gpu of gpuList) {
-        await upsertGpuStats(gpu)
-      }
     }
-
-    // Update CPU stats (if CPU provided)
-    if (payload.hardware.cpu) {
-      await upsertCpuStats(payload.hardware.cpu)
-    }
-
-    // Update model stats
-    await upsertModelStats(payload.benchmark.model, payload.benchmark.model_parameters_b ?? undefined)
 
     return NextResponse.json({
       success: true,
@@ -142,149 +127,6 @@ export async function POST(request: NextRequest) {
       { error: 'Internal server error' },
       { status: 500 }
     )
-  }
-}
-
-async function upsertGpuStats(gpu: { name: string; vendor: string; vram_mb: number }) {
-  // Count submissions that include this GPU
-  const [stats] = await db
-    .select({
-      count: count(),
-    })
-    .from(submissionGpus)
-    .where(eq(submissionGpus.gpuName, gpu.name))
-
-  // Get average scores from submissions that use this GPU
-  const submissionsWithGpu = await db
-    .select({
-      score: submissions.score,
-      tokensPerSecond: submissions.tokensPerSecond,
-    })
-    .from(submissions)
-    .innerJoin(submissionGpus, eq(submissions.id, submissionGpus.submissionId))
-    .where(eq(submissionGpus.gpuName, gpu.name))
-
-  const submissionCount = submissionsWithGpu.length
-  const avgScore = submissionCount > 0
-    ? submissionsWithGpu.reduce((sum, s) => sum + s.score, 0) / submissionCount
-    : 0
-  const avgTps = submissionCount > 0
-    ? submissionsWithGpu.reduce((sum, s) => sum + s.tokensPerSecond, 0) / submissionCount
-    : 0
-
-  const [existingGpu] = await db
-    .select()
-    .from(gpus)
-    .where(eq(gpus.name, gpu.name))
-    .limit(1)
-
-  if (existingGpu) {
-    await db
-      .update(gpus)
-      .set({
-        submissionCount,
-        avgScore,
-        avgTokensPerSecond: avgTps,
-      })
-      .where(eq(gpus.name, gpu.name))
-  } else {
-    await db.insert(gpus).values({
-      name: gpu.name,
-      vendor: gpu.vendor,
-      vramMb: gpu.vram_mb,
-      submissionCount,
-      avgScore,
-      avgTokensPerSecond: avgTps,
-    })
-  }
-}
-
-async function upsertCpuStats(cpu: { model: string; vendor: string; cores: number; threads: number }) {
-  const [stats] = await db
-    .select({
-      count: count(),
-      avgScore: avg(submissions.score),
-      avgTps: avg(submissions.tokensPerSecond),
-    })
-    .from(submissions)
-    .where(eq(submissions.cpuName, cpu.model))
-
-  const submissionCount = Number(stats?.count) || 0
-  const avgScore = Number(stats?.avgScore) || 0
-  const avgTps = Number(stats?.avgTps) || 0
-
-  const [existingCpu] = await db
-    .select()
-    .from(cpus)
-    .where(eq(cpus.name, cpu.model))
-    .limit(1)
-
-  if (existingCpu) {
-    await db
-      .update(cpus)
-      .set({
-        submissionCount,
-        avgScore,
-        avgTokensPerSecond: avgTps,
-      })
-      .where(eq(cpus.name, cpu.model))
-  } else {
-    await db.insert(cpus).values({
-      name: cpu.model,
-      vendor: cpu.vendor,
-      cores: cpu.cores,
-      threads: cpu.threads,
-      submissionCount,
-      avgScore,
-      avgTokensPerSecond: avgTps,
-    })
-  }
-}
-
-async function upsertModelStats(modelName: string, parametersB?: number) {
-  const [stats] = await db
-    .select({
-      count: count(),
-      avgScore: avg(submissions.score),
-      avgTps: avg(submissions.tokensPerSecond),
-    })
-    .from(submissions)
-    .where(eq(submissions.model, modelName))
-
-  const submissionCount = Number(stats?.count) || 0
-  const avgScore = Number(stats?.avgScore) || 0
-  const avgTps = Number(stats?.avgTps) || 0
-
-  const [existingModel] = await db
-    .select()
-    .from(models)
-    .where(eq(models.name, modelName))
-    .limit(1)
-
-  if (existingModel) {
-    await db
-      .update(models)
-      .set({
-        submissionCount,
-        avgScore,
-        avgTokensPerSecond: avgTps,
-      })
-      .where(eq(models.name, modelName))
-  } else {
-    // Extract vendor and display name from model ID
-    const parts = modelName.split('/')
-    const vendor = parts.length > 1 ? parts[0] : 'Unknown'
-    const displayName = parts.length > 1 ? parts[1] : modelName
-
-    await db.insert(models).values({
-      name: modelName,
-      displayName,
-      vendor,
-      parametersB: parametersB || 0,
-      submissionCount,
-      avgScore,
-      avgTokensPerSecond: avgTps,
-    })
   }
 }
 

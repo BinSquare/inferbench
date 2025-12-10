@@ -1,9 +1,14 @@
-import { db, models, submissions } from '@/db'
-import { desc, eq } from 'drizzle-orm'
+import { db, submissions } from '@/db'
+import { desc, eq, sql } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
+import { MODEL_LIST } from '@/lib/hardware-data'
 
 const MAX_NAME_LENGTH = 300  // Model names can be longer (e.g., huggingface paths)
 const MAX_SUBMISSIONS_PER_DETAIL = 500
+
+// Create lookup maps from hardware data
+const modelParamsMap = new Map(MODEL_LIST.map(m => [m.name, m.parameters_b]))
+const modelContextMap = new Map(MODEL_LIST.map(m => [m.name, m.context_length]))
 
 export async function GET(
   request: NextRequest,
@@ -19,25 +24,38 @@ export async function GET(
 
     const decodedName = decodeURIComponent(name)
 
-    // Get model info
-    const [model] = await db
-      .select()
-      .from(models)
-      .where(eq(models.name, decodedName))
-      .limit(1)
+    // Get model stats from submissions
+    const [modelStats] = await db
+      .select({
+        submissionCount: sql<number>`count(*)::int`,
+        avgTokensPerSecond: sql<number>`avg(${submissions.tokensPerSecond})`,
+        avgParametersB: sql<number>`avg(${submissions.modelParametersB})`,
+      })
+      .from(submissions)
+      .where(eq(submissions.model, decodedName))
 
-    if (!model) {
+    if (!modelStats || modelStats.submissionCount === 0) {
       return NextResponse.json({ error: 'Model not found' }, { status: 404 })
     }
 
-    // Get model rank by tokens per second
-    const allModels = await db
-      .select({ name: models.name, avgTps: models.avgTokensPerSecond })
-      .from(models)
-      .orderBy(desc(models.avgTokensPerSecond))
+    // Get model info from static data or derive from name
+    const displayName = decodedName.split('/').pop()?.replace(/-/g, ' ') || decodedName
+    const vendor = decodedName.split('/')[0] || 'Unknown'
+    const parametersB = modelParamsMap.get(decodedName) || Number(modelStats.avgParametersB) || null
+    const contextLength = modelContextMap.get(decodedName) || null
 
-    const rank = allModels.findIndex(m => m.name === decodedName) + 1
-    const totalModels = allModels.length || 1
+    // Get model rank by avg tokens per second
+    const allModelStats = await db
+      .select({
+        model: submissions.model,
+        avgTps: sql<number>`avg(${submissions.tokensPerSecond})`,
+      })
+      .from(submissions)
+      .groupBy(submissions.model)
+      .orderBy(sql`avg(${submissions.tokensPerSecond}) DESC`)
+
+    const rank = allModelStats.findIndex(m => m.model === decodedName) + 1
+    const totalModels = allModelStats.length || 1
     const percentile = Math.round(((totalModels - rank) / totalModels) * 100)
 
     // Get submissions for this model (limited to prevent abuse)
@@ -60,15 +78,13 @@ export async function GET(
       .limit(MAX_SUBMISSIONS_PER_DETAIL)
 
     return NextResponse.json({
-      id: model.id,
-      name: model.name,
-      display_name: model.displayName,
-      vendor: model.vendor,
-      parameters_b: model.parametersB,
-      context_length: model.contextLength,
-      huggingface_url: model.huggingfaceUrl,
-      submission_count: model.submissionCount,
-      avg_tokens_per_second: model.avgTokensPerSecond,
+      name: decodedName,
+      display_name: displayName,
+      vendor,
+      parameters_b: parametersB,
+      context_length: contextLength,
+      submission_count: modelStats.submissionCount,
+      avg_tokens_per_second: Math.round(Number(modelStats.avgTokensPerSecond) * 100) / 100,
       rank,
       percentile,
       all_submissions: allSubmissions.map(sub => ({

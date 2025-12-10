@@ -105,9 +105,9 @@ export async function GET(request: NextRequest) {
         totalSystemCost = (totalGpuCost || 0) + (cpuMsrp || 0) + ramCost
       }
 
-      // Value score based on total system cost
-      const valueScore = totalSystemCost > 0 && sub.tokensPerSecond > 0
-        ? Math.round((sub.tokensPerSecond / totalSystemCost) * 1000) / 1000 // tok/s per $1
+      // Value score based on GPU/SoC cost only (not total system cost)
+      const valueScore = totalGpuCost && totalGpuCost > 0 && sub.tokensPerSecond > 0
+        ? Math.round((sub.tokensPerSecond / totalGpuCost) * 1000) / 1000 // tok/s per $1
         : null
 
       return {
@@ -136,6 +136,12 @@ export async function GET(request: NextRequest) {
         // Results
         tokens_per_second: sub.tokensPerSecond,
         created_at: sub.createdAt.toISOString(),
+        // Metadata
+        source_url: sub.sourceUrl,
+        // Verification status
+        verified: sub.verified,
+        validation_count: sub.validationCount,
+        question_count: sub.questionCount,
         // Cost breakdown
         is_unified_soc: unifiedSoC,
         gpu_msrp_usd: totalGpuCost,

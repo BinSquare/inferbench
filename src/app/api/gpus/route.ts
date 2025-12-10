@@ -1,11 +1,36 @@
-import { db, gpus } from '@/db'
-import { desc, eq, count } from 'drizzle-orm'
+import { db, submissions, submissionGpus } from '@/db'
+import { sql, eq } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
 import { GPU_LIST } from '@/lib/hardware-data'
-import { parsePaginationParams, safeParseInt } from '@/lib/validation'
+import { parsePaginationParams } from '@/lib/validation'
 
-// Create a price lookup map from hardware data
+// Name aliases to match submissions to GPU_LIST
+const GPU_NAME_ALIASES: Record<string, string> = {
+  'NVIDIA H100 PCIe 80GB': 'NVIDIA H100 PCIe',
+  'NVIDIA A100 PCIe 80GB': 'NVIDIA A100 80GB',
+  'NVIDIA GeForce RTX 4090': 'NVIDIA RTX 4090',
+  'NVIDIA GeForce RTX 4080': 'NVIDIA RTX 4080',
+  'NVIDIA GeForce RTX 4070 Ti': 'NVIDIA RTX 4070 Ti',
+  'NVIDIA GeForce RTX 3090': 'NVIDIA RTX 3090',
+  'NVIDIA GeForce RTX 3080 Ti': 'NVIDIA RTX 3080 Ti',
+  'NVIDIA GeForce RTX 3080': 'NVIDIA RTX 3080',
+  'NVIDIA GeForce RTX 3070': 'NVIDIA RTX 3070',
+}
+
+// Create lookup maps from hardware data
 const gpuPriceMap = new Map(GPU_LIST.map(gpu => [gpu.name, gpu.msrp_usd]))
+const gpuVendorMap = new Map(GPU_LIST.map(gpu => [gpu.name, gpu.vendor]))
+const gpuVramMap = new Map(GPU_LIST.map(gpu => [gpu.name, gpu.vram_mb]))
+
+// Helper to lookup GPU info with alias support
+function lookupGpu(name: string) {
+  const aliasedName = GPU_NAME_ALIASES[name] || name
+  return {
+    msrp: gpuPriceMap.get(aliasedName) || gpuPriceMap.get(name),
+    vendor: gpuVendorMap.get(aliasedName) || gpuVendorMap.get(name),
+    vram: gpuVramMap.get(aliasedName) || gpuVramMap.get(name),
+  }
+}
 
 // Valid sort options
 const VALID_SORT_OPTIONS = ['performance', 'value'] as const
@@ -22,45 +47,56 @@ export async function GET(request: NextRequest) {
       : 'performance'
     const { limit, offset } = parsePaginationParams(searchParams)
 
-    // Fetch all GPUs first (we need to calculate value scores before sorting)
-    let data
-    if (vendor) {
-      data = await db
-        .select()
-        .from(gpus)
-        .where(eq(gpus.vendor, vendor))
-    } else {
-      data = await db
-        .select()
-        .from(gpus)
-    }
+    // Compute GPU stats directly from submissions table
+    // This ensures we always have accurate, up-to-date data
+    const gpuStats = await db
+      .select({
+        gpuName: submissions.primaryGpuName,
+        submissionCount: sql<number>`count(*)::int`,
+        avgTokensPerSecond: sql<number>`avg(${submissions.tokensPerSecond})`,
+      })
+      .from(submissions)
+      .where(sql`${submissions.primaryGpuName} IS NOT NULL`)
+      .groupBy(submissions.primaryGpuName)
 
-    // Get total count for percentile calculation
-    const [countResult] = await db
-      .select({ count: count() })
-      .from(gpus)
+    // Build entries with all GPU info
+    let entries = gpuStats.map((stat) => {
+      const gpuName = stat.gpuName!
+      const gpuInfo = lookupGpu(gpuName)
+      const avgTps = Number(stat.avgTokensPerSecond) || 0
 
-    const totalGpus = Number(countResult?.count) || data.length || 1
+      // Infer vendor from name if not in lookup
+      let vendor: string = gpuInfo.vendor || ''
+      if (!vendor) {
+        if (gpuName.startsWith('NVIDIA')) vendor = 'NVIDIA'
+        else if (gpuName.startsWith('AMD')) vendor = 'AMD'
+        else if (gpuName.startsWith('Apple')) vendor = 'Apple'
+        else if (gpuName.startsWith('Intel')) vendor = 'Intel'
+        else vendor = 'Other'
+      }
 
-    // Calculate value score and add to entries
-    let entries = data.map((gpu) => {
-      const msrp = gpuPriceMap.get(gpu.name)
       // Value score = tok/s per $1000 spent
-      const valueScore = msrp && msrp > 0 && gpu.avgTokensPerSecond > 0
-        ? (gpu.avgTokensPerSecond / msrp) * 1000
+      const valueScore = gpuInfo.msrp && gpuInfo.msrp > 0 && avgTps > 0
+        ? (avgTps / gpuInfo.msrp) * 1000
         : null
 
       return {
-        id: gpu.id,
-        name: gpu.name,
-        vendor: gpu.vendor,
-        vram_mb: gpu.vramMb,
-        submission_count: gpu.submissionCount,
-        avg_tokens_per_second: gpu.avgTokensPerSecond,
-        msrp_usd: msrp || null,
+        name: gpuName,
+        vendor,
+        vram_mb: gpuInfo.vram || 0,
+        submission_count: stat.submissionCount,
+        avg_tokens_per_second: Math.round(avgTps * 100) / 100,
+        msrp_usd: gpuInfo.msrp || null,
         value_score: valueScore ? Math.round(valueScore * 10) / 10 : null,
       }
     })
+
+    // Filter by vendor if specified
+    if (vendor) {
+      entries = entries.filter(e => e.vendor === vendor)
+    }
+
+    const totalGpus = entries.length || 1
 
     // Sort based on sortBy parameter
     if (sortBy === 'value') {

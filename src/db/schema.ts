@@ -2,105 +2,10 @@ import { pgTable, uuid, text, integer, real, timestamp, index, boolean, primaryK
 import { relations } from 'drizzle-orm'
 
 // =============================================================================
-// HARDWARE CATALOG TABLES
-// =============================================================================
-
-export const gpus = pgTable('gpus', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-
-  // Identity
-  name: text('name').unique().notNull(),
-  vendor: text('vendor').notNull(), // NVIDIA, AMD, Apple, Intel
-  architecture: text('architecture'), // Ada Lovelace, RDNA3, etc.
-
-  // Specs
-  vramMb: integer('vram_mb').notNull(),
-  memoryBandwidthGbps: real('memory_bandwidth_gbps'), // Critical for LLM inference
-  tdpWatts: integer('tdp_watts'),
-
-  // Pricing
-  msrpUsd: integer('msrp_usd'), // Launch MSRP
-  currentPriceUsd: integer('current_price_usd'), // Current market price (can be updated)
-
-  // Metadata
-  releaseDate: timestamp('release_date', { withTimezone: true }),
-
-  // Aggregated stats (computed from submissions)
-  submissionCount: integer('submission_count').default(0).notNull(),
-  avgScore: real('avg_score').default(0).notNull(),
-  avgTokensPerSecond: real('avg_tokens_per_second').default(0).notNull(),
-}, (table) => [
-  index('idx_gpus_avg_score').on(table.avgScore),
-  index('idx_gpus_vendor').on(table.vendor),
-  index('idx_gpus_vram').on(table.vramMb),
-  index('idx_gpus_msrp').on(table.msrpUsd),
-])
-
-export const cpus = pgTable('cpus', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-
-  // Identity
-  name: text('name').unique().notNull(),
-  vendor: text('vendor').notNull(), // Intel, AMD, Apple
-  architecture: text('architecture'), // Zen 4, Raptor Lake, etc.
-
-  // Specs
-  cores: integer('cores').notNull(),
-  threads: integer('threads').notNull(),
-  baseClockMhz: integer('base_clock_mhz'),
-  boostClockMhz: integer('boost_clock_mhz'),
-  l3CacheMb: integer('l3_cache_mb'), // Important for CPU inference
-  tdpWatts: integer('tdp_watts'),
-
-  // Pricing
-  msrpUsd: integer('msrp_usd'),
-  currentPriceUsd: integer('current_price_usd'),
-
-  // Metadata
-  releaseDate: timestamp('release_date', { withTimezone: true }),
-
-  // Aggregated stats
-  submissionCount: integer('submission_count').default(0).notNull(),
-  avgScore: real('avg_score').default(0).notNull(),
-  avgTokensPerSecond: real('avg_tokens_per_second').default(0).notNull(),
-}, (table) => [
-  index('idx_cpus_avg_score').on(table.avgScore),
-  index('idx_cpus_vendor').on(table.vendor),
-  index('idx_cpus_cores').on(table.cores),
-  index('idx_cpus_msrp').on(table.msrpUsd),
-])
-
-export const models = pgTable('models', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-
-  // Identity
-  name: text('name').unique().notNull(), // e.g., "meta-llama/Llama-3.1-8B-Instruct"
-  displayName: text('display_name').notNull(), // e.g., "Llama 3.1 8B Instruct"
-  vendor: text('vendor').notNull(), // Meta, Mistral, Google, etc.
-
-  // Model specs
-  parametersB: real('parameters_b').notNull(), // 7, 13, 70, etc.
-  contextLength: integer('context_length'), // 4096, 8192, 128000, etc.
-
-  // Metadata
-  releaseDate: timestamp('release_date', { withTimezone: true }),
-  huggingfaceUrl: text('huggingface_url'),
-
-  // Aggregated stats
-  submissionCount: integer('submission_count').default(0).notNull(),
-  avgScore: real('avg_score').default(0).notNull(),
-  avgTokensPerSecond: real('avg_tokens_per_second').default(0).notNull(),
-}, (table) => [
-  index('idx_models_name').on(table.name),
-  index('idx_models_vendor').on(table.vendor),
-  index('idx_models_params').on(table.parametersB),
-])
-
-// =============================================================================
 // SUBMISSIONS TABLE
+// =============================================================================
+// This is the primary table - all GPU/CPU/Model stats are computed dynamically
+// from submissions data. Hardware specs come from src/lib/hardware-data.ts.
 // =============================================================================
 
 export const submissions = pgTable('submissions', {
@@ -255,15 +160,6 @@ export type NewSubmission = typeof submissions.$inferInsert
 
 export type SubmissionGpu = typeof submissionGpus.$inferSelect
 export type NewSubmissionGpu = typeof submissionGpus.$inferInsert
-
-export type GPU = typeof gpus.$inferSelect
-export type NewGPU = typeof gpus.$inferInsert
-
-export type CPU = typeof cpus.$inferSelect
-export type NewCPU = typeof cpus.$inferInsert
-
-export type Model = typeof models.$inferSelect
-export type NewModel = typeof models.$inferInsert
 
 export type SubmissionQuestion = typeof submissionQuestions.$inferSelect
 export type NewSubmissionQuestion = typeof submissionQuestions.$inferInsert

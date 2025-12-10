@@ -367,7 +367,9 @@ export const MODEL_LIST: ModelSpec[] = [
   { name: 'bigcode/starcoder2-3b', displayName: 'StarCoder2 3B', vendor: 'BigCode', parameters_b: 3, context_length: 16384 },
 
   // Llama 3 (legacy)
+  { name: 'meta-llama/Meta-Llama-3-70B', displayName: 'Llama 3 70B', vendor: 'Meta', parameters_b: 70, context_length: 8192 },
   { name: 'meta-llama/Meta-Llama-3-70B-Instruct', displayName: 'Llama 3 70B Instruct', vendor: 'Meta', parameters_b: 70, context_length: 8192 },
+  { name: 'meta-llama/Meta-Llama-3-8B', displayName: 'Llama 3 8B', vendor: 'Meta', parameters_b: 8, context_length: 8192 },
   { name: 'meta-llama/Meta-Llama-3-8B-Instruct', displayName: 'Llama 3 8B Instruct', vendor: 'Meta', parameters_b: 8, context_length: 8192 },
 ]
 

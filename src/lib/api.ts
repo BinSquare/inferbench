@@ -27,6 +27,12 @@ export interface LeaderboardEntry {
   // Results
   tokens_per_second: number
   created_at: string
+  // Metadata
+  source_url: string | null
+  // Verification status
+  verified: boolean
+  validation_count: number
+  question_count: number
   // Cost breakdown
   is_unified_soc: boolean
   gpu_msrp_usd: number | null
