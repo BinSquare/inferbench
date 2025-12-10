@@ -79,6 +79,9 @@ export const GPU_LIST: GPUSpec[] = [
   { name: 'NVIDIA RTX Pro 6000', vendor: 'NVIDIA', vram_mb: 98304, memory_bandwidth_gbps: 1792, tdp_watts: 350, architecture: 'Blackwell', msrp_usd: 8000 },
   { name: 'NVIDIA RTX PRO 6000 Workstation', vendor: 'NVIDIA', vram_mb: 98304, memory_bandwidth_gbps: 1792, tdp_watts: 350, architecture: 'Blackwell', msrp_usd: 8000 },
 
+  // NVIDIA - DGX Spark (GB10 Grace Blackwell Superchip - Unified Memory System)
+  { name: 'NVIDIA DGX Spark', vendor: 'NVIDIA', vram_mb: 131072, memory_bandwidth_gbps: 273, tdp_watts: 140, architecture: 'Blackwell', msrp_usd: 3999 },
+
   // AMD - Ryzen AI Max (Strix Halo APU - Unified Memory)
   { name: 'AMD Ryzen AI Max+ 395', vendor: 'AMD', vram_mb: 131072, memory_bandwidth_gbps: 256, tdp_watts: 120, architecture: 'RDNA 3.5', msrp_usd: 2999 },
   { name: 'AMD Ryzen AI Max 390', vendor: 'AMD', vram_mb: 131072, memory_bandwidth_gbps: 256, tdp_watts: 120, architecture: 'RDNA 3.5', msrp_usd: 2499 },
