@@ -6,9 +6,9 @@ Community benchmark database for local LLM inference.
 
 ```bash
 git clone https://github.com/BinSquare/inferbench.git
-cd inferbench/web
+cd src
 pnpm install
-cp .env.example .env  # Add DATABASE_URL
+cp .env.example .env  # Add DATABASE_URL, any postgresdb compatible works. I use supabase.
 pnpm db:migrate
 pnpm dev
 ```
