@@ -132,6 +132,7 @@ export async function GET(request: NextRequest) {
         model: sub.model,
         model_parameters_b: sub.modelParametersB,
         quantization: sub.quantization,
+        context_length: sub.contextLength,
         backend: sub.backend,
         // Results
         tokens_per_second: sub.tokensPerSecond,

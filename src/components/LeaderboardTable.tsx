@@ -301,6 +301,12 @@ export function LeaderboardTable({ entries, isLoading }: LeaderboardTableProps) 
                                 <span className="text-stone-900">{entry.quantization}</span>
                               </div>
                             )}
+                            {entry.context_length && (
+                              <div>
+                                <span className="text-stone-500">Context Length: </span>
+                                <span className="text-stone-900">{entry.context_length.toLocaleString()}</span>
+                              </div>
+                            )}
                             <div>
                               <span className="text-stone-500">Backend: </span>
                               <span className="text-stone-900">{entry.backend}</span>

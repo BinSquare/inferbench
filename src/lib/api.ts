@@ -23,6 +23,7 @@ export interface LeaderboardEntry {
   model: string
   model_parameters_b: number | null
   quantization: string | null
+  context_length: number | null
   backend: string
   // Results
   tokens_per_second: number
@@ -61,7 +62,6 @@ export interface CPURanking {
   cores: number
   threads: number
   submission_count: number
-  avg_score: number
   avg_tokens_per_second: number
   percentile: number
 }
@@ -88,7 +88,6 @@ export interface CPUDetail extends CPURanking {
     model: string
     backend: string
     tokens_per_second: number
-    score: number
     created_at: string
     gpu_name: string | null
   }>
@@ -311,6 +310,7 @@ export async function submitBenchmark(payload: {
   benchmark: {
     model: string
     backend: string
+    quantization?: string | null
   }
   results: {
     tokens_per_second: number

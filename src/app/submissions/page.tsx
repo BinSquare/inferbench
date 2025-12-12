@@ -12,6 +12,7 @@ interface Submission {
   model: string
   backend: string
   quantization: string | null
+  context_length: number | null
   tokens_per_second: number
   created_at: string
   validation_count: number
@@ -232,6 +233,11 @@ export default function SubmissionsPage() {
                       {sub.quantization && (
                         <span className="ml-2 px-1.5 py-0.5 text-xs font-medium rounded bg-purple-50 text-purple-700">
                           {sub.quantization}
+                        </span>
+                      )}
+                      {sub.context_length && (
+                        <span className="ml-2 px-1.5 py-0.5 text-xs font-medium rounded bg-blue-50 text-blue-700">
+                          {sub.context_length.toLocaleString()} ctx
                         </span>
                       )}
                     </td>

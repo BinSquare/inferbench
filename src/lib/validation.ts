@@ -120,7 +120,6 @@ const resultsSchema = z.object({
   vram_used_mb: z.number().int().min(0).max(10000000).nullish(),
   ram_used_mb: z.number().int().min(0).max(100000000).nullish(),
   power_draw_watts: z.number().min(0).max(100000).nullish(),
-  score: z.number().min(0).max(100).nullish(),
 })
 
 const metadataSchema = z.object({

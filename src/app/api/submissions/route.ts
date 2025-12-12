@@ -5,25 +5,6 @@ import {
   validateRequestBody,
 } from '@/lib/validation'
 
-function calculateScore(tokensPerSecond: number, latencyP50?: number | null): number {
-  // Validate inputs to prevent NaN/Infinity
-  if (!Number.isFinite(tokensPerSecond) || tokensPerSecond <= 0) {
-    return 0
-  }
-
-  const tpsScore = tokensPerSecond / 10
-  const latencyScore =
-    latencyP50 && Number.isFinite(latencyP50) && latencyP50 > 0
-      ? 1000 / latencyP50
-      : 0
-
-  const score = Math.round((tpsScore * 0.7 + latencyScore * 0.3) * 10)
-
-  // Ensure score is within bounds and finite
-  if (!Number.isFinite(score)) return 0
-  return Math.min(Math.max(score, 0), 100)
-}
-
 export async function POST(request: NextRequest) {
   try {
     // Validate request body with Zod schema
@@ -43,12 +24,6 @@ export async function POST(request: NextRequest) {
     const totalGpuCount = gpuList.reduce((sum, gpu) => sum + gpu.quantity, 0)
     const totalVramMb = gpuList.reduce((sum, gpu) => sum + (gpu.vram_mb * gpu.quantity), 0)
     const primaryGpuName = gpuList.length > 0 ? gpuList[0].name : null
-
-    // Calculate score if not provided
-    const score = payload.results.score ?? calculateScore(
-      payload.results.tokens_per_second,
-      payload.results.latency?.p50_ms
-    )
 
     // Insert submission
     const [submission] = await db.insert(submissions).values({
@@ -93,7 +68,7 @@ export async function POST(request: NextRequest) {
       vramUsedMb: payload.results.vram_used_mb || null,
       ramUsedMb: payload.results.ram_used_mb || null,
       powerDrawWatts: payload.results.power_draw_watts || null,
-      score,
+      score: 0, // Deprecated field, kept for schema compatibility
 
       // Metadata
       submitterNotes: payload.metadata?.notes || null,
@@ -117,7 +92,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       submission_id: submission.id,
-      score,
       total_gpu_count: totalGpuCount,
       total_vram_mb: totalVramMb,
     })

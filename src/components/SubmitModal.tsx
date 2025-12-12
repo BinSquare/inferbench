@@ -28,6 +28,7 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
     os: 'linux',
     model: '',
     backend: 'transformers',
+    quantization: '',
     tokensPerSecond: '',
     timeToFirstToken: '',
     latencyP50: '',
@@ -119,6 +120,7 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
       os: 'linux',
       model: '',
       backend: 'transformers',
+      quantization: '',
       tokensPerSecond: '',
       timeToFirstToken: '',
       latencyP50: '',
@@ -178,6 +180,7 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
       benchmark: {
         model: formData.model,
         backend: formData.backend,
+        quantization: formData.quantization || null,
       },
       results: {
         tokens_per_second: parseFloat(formData.tokensPerSecond) || 0,
@@ -462,6 +465,30 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
                           ))}
                         </select>
                       </div>
+                    </div>
+
+                    {/* Quantization */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-stone-700 mb-1">Quantization</label>
+                      <select
+                        name="quantization"
+                        value={formData.quantization}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-stone-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                      >
+                        <option value="">None / Not specified</option>
+                        <option value="FP32">FP32 (32-bit floating point)</option>
+                        <option value="FP16">FP16 (16-bit floating point)</option>
+                        <option value="BF16">BF16 (Brain float 16)</option>
+                        <option value="INT8">INT8 (8-bit integer)</option>
+                        <option value="INT4">INT4 (4-bit integer)</option>
+                        <option value="AWQ">AWQ (Activation-aware Weight Quantization)</option>
+                        <option value="GPTQ">GPTQ (Post-training quantization)</option>
+                        <option value="GGUF">GGUF (llama.cpp format)</option>
+                      </select>
+                      <p className="mt-1 text-xs text-stone-500">
+                        Select the quantization format used for the model weights
+                      </p>
                     </div>
 
                     {/* Performance Metrics */}
