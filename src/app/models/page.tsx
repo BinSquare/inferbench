@@ -55,6 +55,7 @@ export default function ModelsPage() {
                 <th className="px-6 py-4 font-medium">Model</th>
                 <th className="px-6 py-4 font-medium">Vendor</th>
                 <th className="px-6 py-4 font-medium">Parameters</th>
+                <th className="px-6 py-4 font-medium">Quant</th>
                 <th className="px-6 py-4 font-medium">Benchmarks</th>
                 <th className="px-6 py-4 font-medium">Avg tok/s</th>
               </tr>
@@ -93,6 +94,9 @@ export default function ModelsPage() {
                   </td>
                   <td className="px-6 py-4 font-mono text-stone-700">
                     {model.parameters_b}B
+                  </td>
+                  <td className="px-6 py-4 text-sm text-stone-400">
+                    Mixed
                   </td>
                   <td className="px-6 py-4 text-stone-600">
                     {model.submission_count}

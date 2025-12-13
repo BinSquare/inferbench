@@ -185,6 +185,7 @@ export function LeaderboardTable({ entries, isLoading }: LeaderboardTableProps) 
             <th className="px-6 py-4 font-medium">Rank</th>
             <th className="px-6 py-4 font-medium">Hardware</th>
             <th className="px-6 py-4 font-medium">Model</th>
+            <th className="px-6 py-4 font-medium">Quant</th>
             <th className="px-6 py-4 font-medium">Backend</th>
             <th className="px-6 py-4 font-medium">Tokens/sec</th>
             <th className="px-6 py-4 font-medium">tok/s/$</th>
@@ -219,6 +220,11 @@ export function LeaderboardTable({ entries, isLoading }: LeaderboardTableProps) 
                     </span>
                   </td>
                   <td className="px-6 py-4">
+                    <span className="text-sm text-stone-600">
+                      {entry.quantization || '-'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
                     <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-600">
                       {entry.backend}
                     </span>
@@ -250,7 +256,7 @@ export function LeaderboardTable({ entries, isLoading }: LeaderboardTableProps) 
                 </tr>
                 {isExpanded && (
                   <tr key={`${entry.submission_id}-details`} className="bg-stone-50 border-b border-stone-200">
-                    <td colSpan={7} className="px-6 py-4">
+                    <td colSpan={8} className="px-6 py-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* GPU Details */}
                         <div>
