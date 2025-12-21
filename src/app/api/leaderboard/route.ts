@@ -6,7 +6,9 @@ import { GPU_LIST, CPU_LIST } from '@/lib/hardware-data'
 
 // Create price lookup maps from hardware data
 const gpuPriceMap = new Map(GPU_LIST.map(gpu => [gpu.name, gpu.msrp_usd]))
+const gpuUsedPriceMap = new Map(GPU_LIST.map(gpu => [gpu.name, gpu.used_price_usd]))
 const cpuPriceMap = new Map(CPU_LIST.map(cpu => [cpu.name, cpu.msrp_usd]))
+const cpuUsedPriceMap = new Map(CPU_LIST.map(cpu => [cpu.name, cpu.used_price_usd]))
 
 // Estimate RAM cost: ~$3/GB for DDR5, ~$2/GB for DDR4 (rough market average)
 function estimateRamCost(ramMb: number | null): number {
@@ -28,7 +30,7 @@ function isUnifiedSoC(gpuName: string | null, cpuName: string | null): boolean {
 }
 
 // Valid sort options
-const VALID_SORT_OPTIONS = ['tokens_per_second', 'created_at', 'value'] as const
+const VALID_SORT_OPTIONS = ['tokens_per_second', 'created_at', 'value', 'used_value'] as const
 type SortOption = typeof VALID_SORT_OPTIONS[number]
 
 export async function GET(request: NextRequest) {
@@ -48,9 +50,9 @@ export async function GET(request: NextRequest) {
     if (model) conditions.push(eq(submissions.model, model))
     if (backend) conditions.push(eq(submissions.backend, backend))
 
-    // For value sort, we need to fetch more data and sort in memory
+    // For value sorts, we need to fetch more data and sort in memory
     // For other sorts, we can use DB ordering
-    const needsInMemorySort = sort === 'value'
+    const needsInMemorySort = sort === 'value' || sort === 'used_value'
 
     // Determine sort order for DB query
     const orderBy = sort === 'created_at'
@@ -73,9 +75,13 @@ export async function GET(request: NextRequest) {
       // Check if this is a unified SoC (Apple Silicon, AMD Ryzen AI Max)
       const unifiedSoC = isUnifiedSoC(sub.primaryGpuName, sub.cpuName)
 
-      // Calculate component costs
+      // Calculate component costs (MSRP)
       const gpuMsrp = sub.primaryGpuName ? gpuPriceMap.get(sub.primaryGpuName) : null
       const cpuMsrp = sub.cpuName ? cpuPriceMap.get(sub.cpuName) : null
+
+      // Calculate component costs (Used)
+      const gpuUsedPrice = sub.primaryGpuName ? gpuUsedPriceMap.get(sub.primaryGpuName) : null
+      const cpuUsedPrice = sub.cpuName ? cpuUsedPriceMap.get(sub.cpuName) : null
 
       // For unified SoCs, RAM is included in the chip price (unified memory)
       // For discrete systems, estimate RAM cost separately
@@ -83,18 +89,25 @@ export async function GET(request: NextRequest) {
 
       // Calculate total GPU cost (multiply by quantity for multi-GPU setups)
       let totalGpuCost: number | null = null
+      let totalGpuUsedCost: number | null = null
       if (sub.gpus.length > 0) {
         totalGpuCost = 0
+        totalGpuUsedCost = 0
         for (const gpu of sub.gpus) {
           const price = gpuPriceMap.get(gpu.gpuName)
+          const usedPrice = gpuUsedPriceMap.get(gpu.gpuName)
           if (price) {
             totalGpuCost += price * gpu.quantity
           }
+          if (usedPrice) {
+            totalGpuUsedCost += usedPrice * gpu.quantity
+          }
         }
         if (totalGpuCost === 0) totalGpuCost = null
+        if (totalGpuUsedCost === 0) totalGpuUsedCost = null
       }
 
-      // Calculate total system cost
+      // Calculate total system cost (MSRP)
       // For unified SoCs: use only the SoC price (GPU entry), don't add CPU separately
       // For discrete systems: GPU + CPU + RAM
       let totalSystemCost: number
@@ -105,9 +118,22 @@ export async function GET(request: NextRequest) {
         totalSystemCost = (totalGpuCost || 0) + (cpuMsrp || 0) + ramCost
       }
 
+      // Calculate total used system cost
+      let totalUsedCost: number
+      if (unifiedSoC) {
+        totalUsedCost = totalGpuUsedCost || 0
+      } else {
+        totalUsedCost = (totalGpuUsedCost || 0) + (cpuUsedPrice || 0) + ramCost
+      }
+
       // Value score based on GPU/SoC cost only (not total system cost)
       const valueScore = totalGpuCost && totalGpuCost > 0 && sub.tokensPerSecond > 0
         ? Math.round((sub.tokensPerSecond / totalGpuCost) * 1000) / 1000 // tok/s per $1
+        : null
+
+      // Used value score based on used GPU/SoC cost
+      const usedValueScore = totalGpuUsedCost && totalGpuUsedCost > 0 && sub.tokensPerSecond > 0
+        ? Math.round((sub.tokensPerSecond / totalGpuUsedCost) * 1000) / 1000 // tok/s per $1
         : null
 
       return {
@@ -146,10 +172,14 @@ export async function GET(request: NextRequest) {
         // Cost breakdown
         is_unified_soc: unifiedSoC,
         gpu_msrp_usd: totalGpuCost,
+        gpu_used_price_usd: totalGpuUsedCost,
         cpu_msrp_usd: unifiedSoC ? null : (cpuMsrp || null), // Don't show separate CPU cost for SoCs
+        cpu_used_price_usd: unifiedSoC ? null : (cpuUsedPrice || null),
         ram_cost_usd: ramCost,
         total_system_cost_usd: totalSystemCost > 0 ? totalSystemCost : null,
+        total_used_cost_usd: totalUsedCost > 0 ? totalUsedCost : null,
         value_score: valueScore,
+        used_value_score: usedValueScore,
       }
     })
 
@@ -160,6 +190,15 @@ export async function GET(request: NextRequest) {
         if (a.value_score === null) return 1
         if (b.value_score === null) return -1
         return b.value_score - a.value_score
+      })
+      // Apply pagination after sorting
+      entries = entries.slice(offset, offset + limit)
+    } else if (sort === 'used_value') {
+      entries.sort((a, b) => {
+        if (a.used_value_score === null && b.used_value_score === null) return 0
+        if (a.used_value_score === null) return 1
+        if (b.used_value_score === null) return -1
+        return b.used_value_score - a.used_value_score
       })
       // Apply pagination after sorting
       entries = entries.slice(offset, offset + limit)

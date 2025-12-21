@@ -6,6 +6,7 @@ export interface GPUSpec {
   tdp_watts?: number
   architecture?: string
   msrp_usd?: number
+  used_price_usd?: number  // Typical used/secondary market price (updated quarterly, last: Dec 2025)
 }
 
 export interface CPUSpec {
@@ -19,6 +20,7 @@ export interface CPUSpec {
   tdp_watts?: number
   architecture?: string
   msrp_usd?: number
+  used_price_usd?: number  // Typical used/secondary market price (updated quarterly, last: Dec 2025)
 }
 
 export interface ModelSpec {
@@ -30,208 +32,214 @@ export interface ModelSpec {
 }
 
 export const GPU_LIST: GPUSpec[] = [
-  // NVIDIA - RTX 50 Series (Blackwell)
+  // NVIDIA - RTX 50 Series (Blackwell) - Too new for used market
   { name: 'NVIDIA RTX 5090', vendor: 'NVIDIA', vram_mb: 32768, memory_bandwidth_gbps: 1792, tdp_watts: 575, architecture: 'Blackwell', msrp_usd: 1999 },
   { name: 'NVIDIA RTX 5080', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 960, tdp_watts: 360, architecture: 'Blackwell', msrp_usd: 999 },
   { name: 'NVIDIA RTX 5070 Ti', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 896, tdp_watts: 300, architecture: 'Blackwell', msrp_usd: 749 },
   { name: 'NVIDIA RTX 5070', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 672, tdp_watts: 250, architecture: 'Blackwell', msrp_usd: 549 },
 
-  // NVIDIA - RTX 40 Series
-  { name: 'NVIDIA RTX 4090', vendor: 'NVIDIA', vram_mb: 24576, memory_bandwidth_gbps: 1008, tdp_watts: 450, architecture: 'Ada Lovelace', msrp_usd: 1599 },
-  { name: 'NVIDIA RTX 4080 SUPER', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 736, tdp_watts: 320, architecture: 'Ada Lovelace', msrp_usd: 999 },
-  { name: 'NVIDIA RTX 4080', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 717, tdp_watts: 320, architecture: 'Ada Lovelace', msrp_usd: 1199 },
-  { name: 'NVIDIA RTX 4070 Ti SUPER', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 672, tdp_watts: 285, architecture: 'Ada Lovelace', msrp_usd: 799 },
-  { name: 'NVIDIA RTX 4070 Ti', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 504, tdp_watts: 285, architecture: 'Ada Lovelace', msrp_usd: 799 },
-  { name: 'NVIDIA RTX 4070 SUPER', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 504, tdp_watts: 220, architecture: 'Ada Lovelace', msrp_usd: 599 },
-  { name: 'NVIDIA RTX 4070', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 504, tdp_watts: 200, architecture: 'Ada Lovelace', msrp_usd: 549 },
-  { name: 'NVIDIA RTX 4060 Ti 16GB', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 288, tdp_watts: 165, architecture: 'Ada Lovelace', msrp_usd: 499 },
-  { name: 'NVIDIA RTX 4060 Ti 8GB', vendor: 'NVIDIA', vram_mb: 8192, memory_bandwidth_gbps: 288, tdp_watts: 160, architecture: 'Ada Lovelace', msrp_usd: 399 },
-  { name: 'NVIDIA RTX 4060', vendor: 'NVIDIA', vram_mb: 8192, memory_bandwidth_gbps: 272, tdp_watts: 115, architecture: 'Ada Lovelace', msrp_usd: 299 },
+  // NVIDIA - RTX 40 Series (Used prices from eBay Dec 2025)
+  { name: 'NVIDIA RTX 4090', vendor: 'NVIDIA', vram_mb: 24576, memory_bandwidth_gbps: 1008, tdp_watts: 450, architecture: 'Ada Lovelace', msrp_usd: 1599, used_price_usd: 1800 },
+  { name: 'NVIDIA RTX 4080 SUPER', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 736, tdp_watts: 320, architecture: 'Ada Lovelace', msrp_usd: 999, used_price_usd: 850 },
+  { name: 'NVIDIA RTX 4080', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 717, tdp_watts: 320, architecture: 'Ada Lovelace', msrp_usd: 1199, used_price_usd: 800 },
+  { name: 'NVIDIA RTX 4070 Ti SUPER', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 672, tdp_watts: 285, architecture: 'Ada Lovelace', msrp_usd: 799, used_price_usd: 600 },
+  { name: 'NVIDIA RTX 4070 Ti', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 504, tdp_watts: 285, architecture: 'Ada Lovelace', msrp_usd: 799, used_price_usd: 500 },
+  { name: 'NVIDIA RTX 4070 SUPER', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 504, tdp_watts: 220, architecture: 'Ada Lovelace', msrp_usd: 599, used_price_usd: 500 },
+  { name: 'NVIDIA RTX 4070', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 504, tdp_watts: 200, architecture: 'Ada Lovelace', msrp_usd: 549, used_price_usd: 400 },
+  { name: 'NVIDIA RTX 4060 Ti 16GB', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 288, tdp_watts: 165, architecture: 'Ada Lovelace', msrp_usd: 499, used_price_usd: 350 },
+  { name: 'NVIDIA RTX 4060 Ti 8GB', vendor: 'NVIDIA', vram_mb: 8192, memory_bandwidth_gbps: 288, tdp_watts: 160, architecture: 'Ada Lovelace', msrp_usd: 399, used_price_usd: 300 },
+  { name: 'NVIDIA RTX 4060', vendor: 'NVIDIA', vram_mb: 8192, memory_bandwidth_gbps: 272, tdp_watts: 115, architecture: 'Ada Lovelace', msrp_usd: 299, used_price_usd: 220 },
 
-  // NVIDIA - RTX 30 Series
-  { name: 'NVIDIA RTX 3090 Ti', vendor: 'NVIDIA', vram_mb: 24576, memory_bandwidth_gbps: 1008, tdp_watts: 450, architecture: 'Ampere', msrp_usd: 1999 },
-  { name: 'NVIDIA RTX 3090', vendor: 'NVIDIA', vram_mb: 24576, memory_bandwidth_gbps: 936, tdp_watts: 350, architecture: 'Ampere', msrp_usd: 1499 },
-  { name: 'NVIDIA RTX 3080 Ti', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 912, tdp_watts: 350, architecture: 'Ampere', msrp_usd: 1199 },
-  { name: 'NVIDIA RTX 3080 12GB', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 912, tdp_watts: 350, architecture: 'Ampere', msrp_usd: 799 },
-  { name: 'NVIDIA RTX 3080 10GB', vendor: 'NVIDIA', vram_mb: 10240, memory_bandwidth_gbps: 760, tdp_watts: 320, architecture: 'Ampere', msrp_usd: 699 },
-  { name: 'NVIDIA RTX 3070 Ti', vendor: 'NVIDIA', vram_mb: 8192, memory_bandwidth_gbps: 608, tdp_watts: 290, architecture: 'Ampere', msrp_usd: 599 },
-  { name: 'NVIDIA RTX 3070', vendor: 'NVIDIA', vram_mb: 8192, memory_bandwidth_gbps: 448, tdp_watts: 220, architecture: 'Ampere', msrp_usd: 499 },
-  { name: 'NVIDIA RTX 3060 Ti', vendor: 'NVIDIA', vram_mb: 8192, memory_bandwidth_gbps: 448, tdp_watts: 200, architecture: 'Ampere', msrp_usd: 399 },
-  { name: 'NVIDIA RTX 3060 12GB', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 360, tdp_watts: 170, architecture: 'Ampere', msrp_usd: 329 },
+  // NVIDIA - RTX 30 Series (Used prices from eBay Dec 2025)
+  { name: 'NVIDIA RTX 3090 Ti', vendor: 'NVIDIA', vram_mb: 24576, memory_bandwidth_gbps: 1008, tdp_watts: 450, architecture: 'Ampere', msrp_usd: 1999, used_price_usd: 750 },
+  { name: 'NVIDIA RTX 3090', vendor: 'NVIDIA', vram_mb: 24576, memory_bandwidth_gbps: 936, tdp_watts: 350, architecture: 'Ampere', msrp_usd: 1499, used_price_usd: 700 },
+  { name: 'NVIDIA RTX 3080 Ti', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 912, tdp_watts: 350, architecture: 'Ampere', msrp_usd: 1199, used_price_usd: 400 },
+  { name: 'NVIDIA RTX 3080 12GB', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 912, tdp_watts: 350, architecture: 'Ampere', msrp_usd: 799, used_price_usd: 320 },
+  { name: 'NVIDIA RTX 3080 10GB', vendor: 'NVIDIA', vram_mb: 10240, memory_bandwidth_gbps: 760, tdp_watts: 320, architecture: 'Ampere', msrp_usd: 699, used_price_usd: 290 },
+  { name: 'NVIDIA RTX 3070 Ti', vendor: 'NVIDIA', vram_mb: 8192, memory_bandwidth_gbps: 608, tdp_watts: 290, architecture: 'Ampere', msrp_usd: 599, used_price_usd: 250 },
+  { name: 'NVIDIA RTX 3070', vendor: 'NVIDIA', vram_mb: 8192, memory_bandwidth_gbps: 448, tdp_watts: 220, architecture: 'Ampere', msrp_usd: 499, used_price_usd: 205 },
+  { name: 'NVIDIA RTX 3060 Ti', vendor: 'NVIDIA', vram_mb: 8192, memory_bandwidth_gbps: 448, tdp_watts: 200, architecture: 'Ampere', msrp_usd: 399, used_price_usd: 190 },
+  { name: 'NVIDIA RTX 3060 12GB', vendor: 'NVIDIA', vram_mb: 12288, memory_bandwidth_gbps: 360, tdp_watts: 170, architecture: 'Ampere', msrp_usd: 329, used_price_usd: 170 },
 
-  // NVIDIA - Professional / Data Center (Blackwell)
+  // NVIDIA - Professional / Data Center (Blackwell) - Too new for used market
   { name: 'NVIDIA B200', vendor: 'NVIDIA', vram_mb: 196608, memory_bandwidth_gbps: 8000, tdp_watts: 1000, architecture: 'Blackwell', msrp_usd: 40000 },
   { name: 'NVIDIA B100', vendor: 'NVIDIA', vram_mb: 196608, memory_bandwidth_gbps: 8000, tdp_watts: 700, architecture: 'Blackwell', msrp_usd: 35000 },
   { name: 'NVIDIA GB200 NVL72', vendor: 'NVIDIA', vram_mb: 196608, memory_bandwidth_gbps: 8000, tdp_watts: 1200, architecture: 'Blackwell', msrp_usd: 50000 },
 
-  // NVIDIA - Professional / Data Center (Hopper)
-  { name: 'NVIDIA H100 80GB', vendor: 'NVIDIA', vram_mb: 81920, memory_bandwidth_gbps: 3350, tdp_watts: 700, architecture: 'Hopper', msrp_usd: 30000 },
-  { name: 'NVIDIA H100 PCIe', vendor: 'NVIDIA', vram_mb: 81920, memory_bandwidth_gbps: 2000, tdp_watts: 350, architecture: 'Hopper', msrp_usd: 25000 },
+  // NVIDIA - Professional / Data Center (Hopper/Ampere) - Used prices from broker sites Dec 2025
+  { name: 'NVIDIA H100 SXM 80GB', vendor: 'NVIDIA', vram_mb: 81920, memory_bandwidth_gbps: 3350, tdp_watts: 700, architecture: 'Hopper', msrp_usd: 30000, used_price_usd: 28000 },
+  { name: 'NVIDIA H100 80GB', vendor: 'NVIDIA', vram_mb: 81920, memory_bandwidth_gbps: 3350, tdp_watts: 700, architecture: 'Hopper', msrp_usd: 30000, used_price_usd: 28000 },
+  { name: 'NVIDIA H100 PCIe', vendor: 'NVIDIA', vram_mb: 81920, memory_bandwidth_gbps: 2000, tdp_watts: 350, architecture: 'Hopper', msrp_usd: 25000, used_price_usd: 22000 },
   { name: 'NVIDIA H200', vendor: 'NVIDIA', vram_mb: 143360, memory_bandwidth_gbps: 4800, tdp_watts: 700, architecture: 'Hopper', msrp_usd: 35000 },
-  { name: 'NVIDIA A100 80GB', vendor: 'NVIDIA', vram_mb: 81920, memory_bandwidth_gbps: 2039, tdp_watts: 400, architecture: 'Ampere', msrp_usd: 15000 },
-  { name: 'NVIDIA A100 40GB', vendor: 'NVIDIA', vram_mb: 40960, memory_bandwidth_gbps: 1555, tdp_watts: 400, architecture: 'Ampere', msrp_usd: 10000 },
-  { name: 'NVIDIA A6000', vendor: 'NVIDIA', vram_mb: 49152, memory_bandwidth_gbps: 768, tdp_watts: 300, architecture: 'Ampere', msrp_usd: 4650 },
-  { name: 'NVIDIA A5000', vendor: 'NVIDIA', vram_mb: 24576, memory_bandwidth_gbps: 768, tdp_watts: 230, architecture: 'Ampere', msrp_usd: 2500 },
-  { name: 'NVIDIA A4000', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 448, tdp_watts: 140, architecture: 'Ampere', msrp_usd: 1000 },
-  { name: 'NVIDIA L40S', vendor: 'NVIDIA', vram_mb: 49152, memory_bandwidth_gbps: 864, tdp_watts: 350, architecture: 'Ada Lovelace', msrp_usd: 8000 },
-  { name: 'NVIDIA L40', vendor: 'NVIDIA', vram_mb: 49152, memory_bandwidth_gbps: 864, tdp_watts: 300, architecture: 'Ada Lovelace', msrp_usd: 7000 },
-  { name: 'NVIDIA L4', vendor: 'NVIDIA', vram_mb: 24576, memory_bandwidth_gbps: 300, tdp_watts: 72, architecture: 'Ada Lovelace', msrp_usd: 2500 },
+  { name: 'NVIDIA A100 80GB', vendor: 'NVIDIA', vram_mb: 81920, memory_bandwidth_gbps: 2039, tdp_watts: 400, architecture: 'Ampere', msrp_usd: 15000, used_price_usd: 12000 },
+  { name: 'NVIDIA A100 40GB', vendor: 'NVIDIA', vram_mb: 40960, memory_bandwidth_gbps: 1555, tdp_watts: 400, architecture: 'Ampere', msrp_usd: 10000, used_price_usd: 8000 },
+  { name: 'NVIDIA A6000', vendor: 'NVIDIA', vram_mb: 49152, memory_bandwidth_gbps: 768, tdp_watts: 300, architecture: 'Ampere', msrp_usd: 4650, used_price_usd: 2500 },
+  { name: 'NVIDIA RTX A6000', vendor: 'NVIDIA', vram_mb: 49152, memory_bandwidth_gbps: 768, tdp_watts: 300, architecture: 'Ampere', msrp_usd: 4650, used_price_usd: 2500 },
+  { name: 'NVIDIA A5000', vendor: 'NVIDIA', vram_mb: 24576, memory_bandwidth_gbps: 768, tdp_watts: 230, architecture: 'Ampere', msrp_usd: 2500, used_price_usd: 1200 },
+  { name: 'NVIDIA A4000', vendor: 'NVIDIA', vram_mb: 16384, memory_bandwidth_gbps: 448, tdp_watts: 140, architecture: 'Ampere', msrp_usd: 1000, used_price_usd: 500 },
+  { name: 'NVIDIA A40', vendor: 'NVIDIA', vram_mb: 49152, memory_bandwidth_gbps: 696, tdp_watts: 300, architecture: 'Ampere', msrp_usd: 5000, used_price_usd: 2000 },
+  { name: 'NVIDIA L40S', vendor: 'NVIDIA', vram_mb: 49152, memory_bandwidth_gbps: 864, tdp_watts: 350, architecture: 'Ada Lovelace', msrp_usd: 8000, used_price_usd: 5500 },
+  { name: 'NVIDIA L40', vendor: 'NVIDIA', vram_mb: 49152, memory_bandwidth_gbps: 864, tdp_watts: 300, architecture: 'Ada Lovelace', msrp_usd: 7000, used_price_usd: 4500 },
+  { name: 'NVIDIA L4', vendor: 'NVIDIA', vram_mb: 24576, memory_bandwidth_gbps: 300, tdp_watts: 72, architecture: 'Ada Lovelace', msrp_usd: 2500, used_price_usd: 1500 },
   { name: 'NVIDIA RTX Pro 6000', vendor: 'NVIDIA', vram_mb: 98304, memory_bandwidth_gbps: 1792, tdp_watts: 350, architecture: 'Blackwell', msrp_usd: 8000 },
   { name: 'NVIDIA RTX PRO 6000 Workstation', vendor: 'NVIDIA', vram_mb: 98304, memory_bandwidth_gbps: 1792, tdp_watts: 350, architecture: 'Blackwell', msrp_usd: 8000 },
 
-  // NVIDIA - DGX Spark (GB10 Grace Blackwell Superchip - Unified Memory System)
+  // NVIDIA - DGX Spark (GB10 Grace Blackwell Superchip - Unified Memory System) - Too new
   { name: 'NVIDIA DGX Spark', vendor: 'NVIDIA', vram_mb: 131072, memory_bandwidth_gbps: 273, tdp_watts: 140, architecture: 'Blackwell', msrp_usd: 3999 },
 
-  // NVIDIA - Jetson Thor (Blackwell-based robotics supercomputer)
+  // NVIDIA - Jetson Thor (Blackwell-based robotics supercomputer) - Too new
   { name: 'NVIDIA Jetson Thor', vendor: 'NVIDIA', vram_mb: 131072, memory_bandwidth_gbps: 273, tdp_watts: 130, architecture: 'Blackwell', msrp_usd: 4999 },
 
-  // AMD - Ryzen AI Max (Strix Halo APU - Unified Memory)
+  // AMD - Ryzen AI Max (Strix Halo APU - Unified Memory) - Too new for used market
   { name: 'AMD Ryzen AI Max+ 395', vendor: 'AMD', vram_mb: 131072, memory_bandwidth_gbps: 256, tdp_watts: 120, architecture: 'RDNA 3.5', msrp_usd: 2999 },
   { name: 'AMD Ryzen AI Max 390', vendor: 'AMD', vram_mb: 131072, memory_bandwidth_gbps: 256, tdp_watts: 120, architecture: 'RDNA 3.5', msrp_usd: 2499 },
   { name: 'AMD Ryzen AI Max 385', vendor: 'AMD', vram_mb: 65536, memory_bandwidth_gbps: 256, tdp_watts: 100, architecture: 'RDNA 3.5', msrp_usd: 1999 },
 
-  // AMD - RX 9000 Series (RDNA 4)
+  // AMD - RX 9000 Series (RDNA 4) - Too new for used market
   { name: 'AMD RX 9070 XT', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 650, tdp_watts: 280, architecture: 'RDNA 4', msrp_usd: 599 },
   { name: 'AMD RX 9070', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 576, tdp_watts: 250, architecture: 'RDNA 4', msrp_usd: 499 },
 
-  // AMD - RX 7000 Series
-  { name: 'AMD RX 7900 XTX', vendor: 'AMD', vram_mb: 24576, memory_bandwidth_gbps: 960, tdp_watts: 355, architecture: 'RDNA 3', msrp_usd: 999 },
-  { name: 'AMD RX 7900 XT', vendor: 'AMD', vram_mb: 20480, memory_bandwidth_gbps: 800, tdp_watts: 315, architecture: 'RDNA 3', msrp_usd: 899 },
-  { name: 'AMD RX 7900 GRE', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 576, tdp_watts: 260, architecture: 'RDNA 3', msrp_usd: 549 },
-  { name: 'AMD RX 7800 XT', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 624, tdp_watts: 263, architecture: 'RDNA 3', msrp_usd: 499 },
-  { name: 'AMD RX 7700 XT', vendor: 'AMD', vram_mb: 12288, memory_bandwidth_gbps: 432, tdp_watts: 245, architecture: 'RDNA 3', msrp_usd: 449 },
-  { name: 'AMD RX 7600 XT', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 288, tdp_watts: 190, architecture: 'RDNA 3', msrp_usd: 329 },
-  { name: 'AMD RX 7600', vendor: 'AMD', vram_mb: 8192, memory_bandwidth_gbps: 288, tdp_watts: 165, architecture: 'RDNA 3', msrp_usd: 269 },
+  // AMD - RX 7000 Series (Used prices from eBay Dec 2025)
+  { name: 'AMD RX 7900 XTX', vendor: 'AMD', vram_mb: 24576, memory_bandwidth_gbps: 960, tdp_watts: 355, architecture: 'RDNA 3', msrp_usd: 999, used_price_usd: 700 },
+  { name: 'AMD RX 7900 XT', vendor: 'AMD', vram_mb: 20480, memory_bandwidth_gbps: 800, tdp_watts: 315, architecture: 'RDNA 3', msrp_usd: 899, used_price_usd: 475 },
+  { name: 'AMD RX 7900 GRE', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 576, tdp_watts: 260, architecture: 'RDNA 3', msrp_usd: 549, used_price_usd: 400 },
+  { name: 'AMD RX 7800 XT', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 624, tdp_watts: 263, architecture: 'RDNA 3', msrp_usd: 499, used_price_usd: 400 },
+  { name: 'AMD RX 7700 XT', vendor: 'AMD', vram_mb: 12288, memory_bandwidth_gbps: 432, tdp_watts: 245, architecture: 'RDNA 3', msrp_usd: 449, used_price_usd: 330 },
+  { name: 'AMD RX 7600 XT', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 288, tdp_watts: 190, architecture: 'RDNA 3', msrp_usd: 329, used_price_usd: 270 },
+  { name: 'AMD RX 7600', vendor: 'AMD', vram_mb: 8192, memory_bandwidth_gbps: 288, tdp_watts: 165, architecture: 'RDNA 3', msrp_usd: 269, used_price_usd: 200 },
 
-  // AMD - RX 6000 Series
-  { name: 'AMD RX 6950 XT', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 576, tdp_watts: 335, architecture: 'RDNA 2', msrp_usd: 1099 },
-  { name: 'AMD RX 6900 XT', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 512, tdp_watts: 300, architecture: 'RDNA 2', msrp_usd: 999 },
-  { name: 'AMD RX 6800 XT', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 512, tdp_watts: 300, architecture: 'RDNA 2', msrp_usd: 649 },
-  { name: 'AMD RX 6800', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 512, tdp_watts: 250, architecture: 'RDNA 2', msrp_usd: 579 },
-  { name: 'AMD RX 6700 XT', vendor: 'AMD', vram_mb: 12288, memory_bandwidth_gbps: 384, tdp_watts: 230, architecture: 'RDNA 2', msrp_usd: 479 },
+  // AMD - RX 6000 Series (Used prices from eBay Dec 2025)
+  { name: 'AMD RX 6950 XT', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 576, tdp_watts: 335, architecture: 'RDNA 2', msrp_usd: 1099, used_price_usd: 400 },
+  { name: 'AMD RX 6900 XT', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 512, tdp_watts: 300, architecture: 'RDNA 2', msrp_usd: 999, used_price_usd: 350 },
+  { name: 'AMD RX 6800 XT', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 512, tdp_watts: 300, architecture: 'RDNA 2', msrp_usd: 649, used_price_usd: 300 },
+  { name: 'AMD RX 6800', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 512, tdp_watts: 250, architecture: 'RDNA 2', msrp_usd: 579, used_price_usd: 280 },
+  { name: 'AMD RX 6700 XT', vendor: 'AMD', vram_mb: 12288, memory_bandwidth_gbps: 384, tdp_watts: 230, architecture: 'RDNA 2', msrp_usd: 479, used_price_usd: 200 },
 
-  // AMD - Professional / Data Center
-  { name: 'AMD MI300X', vendor: 'AMD', vram_mb: 196608, memory_bandwidth_gbps: 5300, tdp_watts: 750, architecture: 'CDNA 3', msrp_usd: 15000 },
-  { name: 'AMD MI250X', vendor: 'AMD', vram_mb: 131072, memory_bandwidth_gbps: 3277, tdp_watts: 560, architecture: 'CDNA 2', msrp_usd: 12000 },
-  { name: 'AMD MI210', vendor: 'AMD', vram_mb: 65536, memory_bandwidth_gbps: 1638, tdp_watts: 300, architecture: 'CDNA 2', msrp_usd: 8000 },
-  { name: 'AMD W7900', vendor: 'AMD', vram_mb: 49152, memory_bandwidth_gbps: 864, tdp_watts: 295, architecture: 'RDNA 3', msrp_usd: 3999 },
-  { name: 'AMD W7800', vendor: 'AMD', vram_mb: 32768, memory_bandwidth_gbps: 576, tdp_watts: 260, architecture: 'RDNA 3', msrp_usd: 2499 },
+  // AMD - Professional / Data Center (Used prices estimated Dec 2025)
+  { name: 'AMD MI300X', vendor: 'AMD', vram_mb: 196608, memory_bandwidth_gbps: 5300, tdp_watts: 750, architecture: 'CDNA 3', msrp_usd: 15000, used_price_usd: 12000 },
+  { name: 'AMD MI250X', vendor: 'AMD', vram_mb: 131072, memory_bandwidth_gbps: 3277, tdp_watts: 560, architecture: 'CDNA 2', msrp_usd: 12000, used_price_usd: 8000 },
+  { name: 'AMD MI210', vendor: 'AMD', vram_mb: 65536, memory_bandwidth_gbps: 1638, tdp_watts: 300, architecture: 'CDNA 2', msrp_usd: 8000, used_price_usd: 5000 },
+  { name: 'AMD MI100', vendor: 'AMD', vram_mb: 32768, memory_bandwidth_gbps: 1229, tdp_watts: 300, architecture: 'CDNA 1', msrp_usd: 7000, used_price_usd: 2000 },
+  { name: 'AMD MI50', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 1024, tdp_watts: 300, architecture: 'Vega', msrp_usd: 4000, used_price_usd: 800 },
+  { name: 'AMD Radeon VII', vendor: 'AMD', vram_mb: 16384, memory_bandwidth_gbps: 1024, tdp_watts: 300, architecture: 'Vega', msrp_usd: 699, used_price_usd: 400 },
+  { name: 'AMD W7900', vendor: 'AMD', vram_mb: 49152, memory_bandwidth_gbps: 864, tdp_watts: 295, architecture: 'RDNA 3', msrp_usd: 3999, used_price_usd: 2500 },
+  { name: 'AMD W7800', vendor: 'AMD', vram_mb: 32768, memory_bandwidth_gbps: 576, tdp_watts: 260, architecture: 'RDNA 3', msrp_usd: 2499, used_price_usd: 1500 },
 
-  // Apple Silicon (Unified Memory)
+  // Apple Silicon (Unified Memory) - Used prices from Swappa/eBay Dec 2025 (whole system prices)
   { name: 'Apple M4 Max', vendor: 'Apple', vram_mb: 131072, memory_bandwidth_gbps: 546, tdp_watts: 75, architecture: 'Apple Silicon', msrp_usd: 3199 },
   { name: 'Apple M4 Pro', vendor: 'Apple', vram_mb: 49152, memory_bandwidth_gbps: 273, tdp_watts: 60, architecture: 'Apple Silicon', msrp_usd: 1999 },
   { name: 'Apple M4', vendor: 'Apple', vram_mb: 32768, memory_bandwidth_gbps: 120, tdp_watts: 30, architecture: 'Apple Silicon', msrp_usd: 1299 },
-  { name: 'Apple M3 Ultra', vendor: 'Apple', vram_mb: 196608, memory_bandwidth_gbps: 800, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 4999 },
-  { name: 'Apple M3 Max', vendor: 'Apple', vram_mb: 131072, memory_bandwidth_gbps: 400, tdp_watts: 75, architecture: 'Apple Silicon', msrp_usd: 3199 },
-  { name: 'Apple M3 Pro', vendor: 'Apple', vram_mb: 36864, memory_bandwidth_gbps: 200, tdp_watts: 50, architecture: 'Apple Silicon', msrp_usd: 1999 },
-  { name: 'Apple M3', vendor: 'Apple', vram_mb: 24576, memory_bandwidth_gbps: 100, tdp_watts: 25, architecture: 'Apple Silicon', msrp_usd: 1299 },
-  { name: 'Apple M2 Ultra', vendor: 'Apple', vram_mb: 196608, memory_bandwidth_gbps: 800, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 4999 },
-  { name: 'Apple M2 Max', vendor: 'Apple', vram_mb: 98304, memory_bandwidth_gbps: 400, tdp_watts: 75, architecture: 'Apple Silicon', msrp_usd: 3099 },
-  { name: 'Apple M2 Pro', vendor: 'Apple', vram_mb: 32768, memory_bandwidth_gbps: 200, tdp_watts: 50, architecture: 'Apple Silicon', msrp_usd: 1999 },
-  { name: 'Apple M2', vendor: 'Apple', vram_mb: 24576, memory_bandwidth_gbps: 100, tdp_watts: 25, architecture: 'Apple Silicon', msrp_usd: 1199 },
-  { name: 'Apple M1 Ultra', vendor: 'Apple', vram_mb: 131072, memory_bandwidth_gbps: 800, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 3999 },
-  { name: 'Apple M1 Max', vendor: 'Apple', vram_mb: 65536, memory_bandwidth_gbps: 400, tdp_watts: 60, architecture: 'Apple Silicon', msrp_usd: 3099 },
-  { name: 'Apple M1 Pro', vendor: 'Apple', vram_mb: 32768, memory_bandwidth_gbps: 200, tdp_watts: 40, architecture: 'Apple Silicon', msrp_usd: 1999 },
-  { name: 'Apple M1', vendor: 'Apple', vram_mb: 16384, memory_bandwidth_gbps: 68, tdp_watts: 20, architecture: 'Apple Silicon', msrp_usd: 999 },
+  { name: 'Apple M3 Ultra', vendor: 'Apple', vram_mb: 196608, memory_bandwidth_gbps: 800, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 4999, used_price_usd: 4200 },
+  { name: 'Apple M3 Max', vendor: 'Apple', vram_mb: 131072, memory_bandwidth_gbps: 400, tdp_watts: 75, architecture: 'Apple Silicon', msrp_usd: 3199, used_price_usd: 2500 },
+  { name: 'Apple M3 Pro', vendor: 'Apple', vram_mb: 36864, memory_bandwidth_gbps: 200, tdp_watts: 50, architecture: 'Apple Silicon', msrp_usd: 1999, used_price_usd: 1500 },
+  { name: 'Apple M3', vendor: 'Apple', vram_mb: 24576, memory_bandwidth_gbps: 100, tdp_watts: 25, architecture: 'Apple Silicon', msrp_usd: 1299, used_price_usd: 1000 },
+  { name: 'Apple M2 Ultra', vendor: 'Apple', vram_mb: 196608, memory_bandwidth_gbps: 800, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 4999, used_price_usd: 4000 },
+  { name: 'Apple M2 Max', vendor: 'Apple', vram_mb: 98304, memory_bandwidth_gbps: 400, tdp_watts: 75, architecture: 'Apple Silicon', msrp_usd: 3099, used_price_usd: 1700 },
+  { name: 'Apple M2 Pro', vendor: 'Apple', vram_mb: 32768, memory_bandwidth_gbps: 200, tdp_watts: 50, architecture: 'Apple Silicon', msrp_usd: 1999, used_price_usd: 1400 },
+  { name: 'Apple M2', vendor: 'Apple', vram_mb: 24576, memory_bandwidth_gbps: 100, tdp_watts: 25, architecture: 'Apple Silicon', msrp_usd: 1199, used_price_usd: 900 },
+  { name: 'Apple M1 Ultra', vendor: 'Apple', vram_mb: 131072, memory_bandwidth_gbps: 800, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 3999, used_price_usd: 3000 },
+  { name: 'Apple M1 Max', vendor: 'Apple', vram_mb: 65536, memory_bandwidth_gbps: 400, tdp_watts: 60, architecture: 'Apple Silicon', msrp_usd: 3099, used_price_usd: 1500 },
+  { name: 'Apple M1 Pro', vendor: 'Apple', vram_mb: 32768, memory_bandwidth_gbps: 200, tdp_watts: 40, architecture: 'Apple Silicon', msrp_usd: 1999, used_price_usd: 1200 },
+  { name: 'Apple M1', vendor: 'Apple', vram_mb: 16384, memory_bandwidth_gbps: 68, tdp_watts: 20, architecture: 'Apple Silicon', msrp_usd: 999, used_price_usd: 700 },
 
-  // Intel - Battlemage (Arc B-Series)
+  // Intel - Battlemage (Arc B-Series) - Too new for used market
   { name: 'Intel Arc B580', vendor: 'Intel', vram_mb: 12288, memory_bandwidth_gbps: 456, tdp_watts: 190, architecture: 'Battlemage', msrp_usd: 249 },
   { name: 'Intel Arc B570', vendor: 'Intel', vram_mb: 10240, memory_bandwidth_gbps: 380, tdp_watts: 150, architecture: 'Battlemage', msrp_usd: 219 },
 
-  // Intel - Alchemist (Arc A-Series)
-  { name: 'Intel Arc A770 16GB', vendor: 'Intel', vram_mb: 16384, memory_bandwidth_gbps: 560, tdp_watts: 225, architecture: 'Alchemist', msrp_usd: 349 },
-  { name: 'Intel Arc A770 8GB', vendor: 'Intel', vram_mb: 8192, memory_bandwidth_gbps: 512, tdp_watts: 225, architecture: 'Alchemist', msrp_usd: 329 },
-  { name: 'Intel Arc A750', vendor: 'Intel', vram_mb: 8192, memory_bandwidth_gbps: 512, tdp_watts: 225, architecture: 'Alchemist', msrp_usd: 289 },
-  { name: 'Intel Arc A580', vendor: 'Intel', vram_mb: 8192, memory_bandwidth_gbps: 512, tdp_watts: 185, architecture: 'Alchemist', msrp_usd: 179 },
+  // Intel - Alchemist (Arc A-Series) - Used prices from eBay Dec 2025
+  { name: 'Intel Arc A770 16GB', vendor: 'Intel', vram_mb: 16384, memory_bandwidth_gbps: 560, tdp_watts: 225, architecture: 'Alchemist', msrp_usd: 349, used_price_usd: 230 },
+  { name: 'Intel Arc A770 8GB', vendor: 'Intel', vram_mb: 8192, memory_bandwidth_gbps: 512, tdp_watts: 225, architecture: 'Alchemist', msrp_usd: 329, used_price_usd: 200 },
+  { name: 'Intel Arc A750', vendor: 'Intel', vram_mb: 8192, memory_bandwidth_gbps: 512, tdp_watts: 225, architecture: 'Alchemist', msrp_usd: 289, used_price_usd: 170 },
+  { name: 'Intel Arc A580', vendor: 'Intel', vram_mb: 8192, memory_bandwidth_gbps: 512, tdp_watts: 185, architecture: 'Alchemist', msrp_usd: 179, used_price_usd: 130 },
 ]
 
 export const CPU_LIST: CPUSpec[] = [
-  // Intel - 14th Gen (Raptor Lake Refresh)
-  { name: 'Intel Core i9-14900KS', vendor: 'Intel', cores: 24, threads: 32, base_clock_mhz: 3200, boost_clock_mhz: 6200, l3_cache_mb: 36, tdp_watts: 150, architecture: 'Raptor Lake', msrp_usd: 689 },
-  { name: 'Intel Core i9-14900K', vendor: 'Intel', cores: 24, threads: 32, base_clock_mhz: 3200, boost_clock_mhz: 6000, l3_cache_mb: 36, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 589 },
-  { name: 'Intel Core i9-14900KF', vendor: 'Intel', cores: 24, threads: 32, base_clock_mhz: 3200, boost_clock_mhz: 6000, l3_cache_mb: 36, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 564 },
-  { name: 'Intel Core i7-14700K', vendor: 'Intel', cores: 20, threads: 28, base_clock_mhz: 3400, boost_clock_mhz: 5600, l3_cache_mb: 33, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 409 },
-  { name: 'Intel Core i7-14700KF', vendor: 'Intel', cores: 20, threads: 28, base_clock_mhz: 3400, boost_clock_mhz: 5600, l3_cache_mb: 33, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 384 },
-  { name: 'Intel Core i5-14600K', vendor: 'Intel', cores: 14, threads: 20, base_clock_mhz: 3500, boost_clock_mhz: 5300, l3_cache_mb: 24, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 319 },
-  { name: 'Intel Core i5-14600KF', vendor: 'Intel', cores: 14, threads: 20, base_clock_mhz: 3500, boost_clock_mhz: 5300, l3_cache_mb: 24, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 294 },
+  // Intel - 14th Gen (Raptor Lake Refresh) - Used prices from eBay Dec 2025
+  { name: 'Intel Core i9-14900KS', vendor: 'Intel', cores: 24, threads: 32, base_clock_mhz: 3200, boost_clock_mhz: 6200, l3_cache_mb: 36, tdp_watts: 150, architecture: 'Raptor Lake', msrp_usd: 689, used_price_usd: 500 },
+  { name: 'Intel Core i9-14900K', vendor: 'Intel', cores: 24, threads: 32, base_clock_mhz: 3200, boost_clock_mhz: 6000, l3_cache_mb: 36, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 589, used_price_usd: 420 },
+  { name: 'Intel Core i9-14900KF', vendor: 'Intel', cores: 24, threads: 32, base_clock_mhz: 3200, boost_clock_mhz: 6000, l3_cache_mb: 36, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 564, used_price_usd: 400 },
+  { name: 'Intel Core i7-14700K', vendor: 'Intel', cores: 20, threads: 28, base_clock_mhz: 3400, boost_clock_mhz: 5600, l3_cache_mb: 33, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 409, used_price_usd: 320 },
+  { name: 'Intel Core i7-14700KF', vendor: 'Intel', cores: 20, threads: 28, base_clock_mhz: 3400, boost_clock_mhz: 5600, l3_cache_mb: 33, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 384, used_price_usd: 300 },
+  { name: 'Intel Core i5-14600K', vendor: 'Intel', cores: 14, threads: 20, base_clock_mhz: 3500, boost_clock_mhz: 5300, l3_cache_mb: 24, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 319, used_price_usd: 250 },
+  { name: 'Intel Core i5-14600KF', vendor: 'Intel', cores: 14, threads: 20, base_clock_mhz: 3500, boost_clock_mhz: 5300, l3_cache_mb: 24, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 294, used_price_usd: 230 },
 
-  // Intel - 13th Gen (Raptor Lake)
-  { name: 'Intel Core i9-13900KS', vendor: 'Intel', cores: 24, threads: 32, base_clock_mhz: 3000, boost_clock_mhz: 6000, l3_cache_mb: 36, tdp_watts: 150, architecture: 'Raptor Lake', msrp_usd: 699 },
-  { name: 'Intel Core i9-13900K', vendor: 'Intel', cores: 24, threads: 32, base_clock_mhz: 3000, boost_clock_mhz: 5800, l3_cache_mb: 36, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 589 },
-  { name: 'Intel Core i7-13700K', vendor: 'Intel', cores: 16, threads: 24, base_clock_mhz: 3400, boost_clock_mhz: 5400, l3_cache_mb: 30, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 409 },
-  { name: 'Intel Core i5-13600K', vendor: 'Intel', cores: 14, threads: 20, base_clock_mhz: 3500, boost_clock_mhz: 5100, l3_cache_mb: 24, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 319 },
+  // Intel - 13th Gen (Raptor Lake) - Used prices from eBay Dec 2025
+  { name: 'Intel Core i9-13900KS', vendor: 'Intel', cores: 24, threads: 32, base_clock_mhz: 3000, boost_clock_mhz: 6000, l3_cache_mb: 36, tdp_watts: 150, architecture: 'Raptor Lake', msrp_usd: 699, used_price_usd: 400 },
+  { name: 'Intel Core i9-13900K', vendor: 'Intel', cores: 24, threads: 32, base_clock_mhz: 3000, boost_clock_mhz: 5800, l3_cache_mb: 36, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 589, used_price_usd: 350 },
+  { name: 'Intel Core i7-13700K', vendor: 'Intel', cores: 16, threads: 24, base_clock_mhz: 3400, boost_clock_mhz: 5400, l3_cache_mb: 30, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 409, used_price_usd: 280 },
+  { name: 'Intel Core i5-13600K', vendor: 'Intel', cores: 14, threads: 20, base_clock_mhz: 3500, boost_clock_mhz: 5100, l3_cache_mb: 24, tdp_watts: 125, architecture: 'Raptor Lake', msrp_usd: 319, used_price_usd: 220 },
 
-  // Intel - 12th Gen (Alder Lake)
-  { name: 'Intel Core i9-12900KS', vendor: 'Intel', cores: 16, threads: 24, base_clock_mhz: 3400, boost_clock_mhz: 5500, l3_cache_mb: 30, tdp_watts: 150, architecture: 'Alder Lake', msrp_usd: 739 },
-  { name: 'Intel Core i9-12900K', vendor: 'Intel', cores: 16, threads: 24, base_clock_mhz: 3200, boost_clock_mhz: 5200, l3_cache_mb: 30, tdp_watts: 125, architecture: 'Alder Lake', msrp_usd: 589 },
-  { name: 'Intel Core i7-12700K', vendor: 'Intel', cores: 12, threads: 20, base_clock_mhz: 3600, boost_clock_mhz: 5000, l3_cache_mb: 25, tdp_watts: 125, architecture: 'Alder Lake', msrp_usd: 409 },
-  { name: 'Intel Core i5-12600K', vendor: 'Intel', cores: 10, threads: 16, base_clock_mhz: 3700, boost_clock_mhz: 4900, l3_cache_mb: 20, tdp_watts: 125, architecture: 'Alder Lake', msrp_usd: 289 },
+  // Intel - 12th Gen (Alder Lake) - Used prices from eBay Dec 2025
+  { name: 'Intel Core i9-12900KS', vendor: 'Intel', cores: 16, threads: 24, base_clock_mhz: 3400, boost_clock_mhz: 5500, l3_cache_mb: 30, tdp_watts: 150, architecture: 'Alder Lake', msrp_usd: 739, used_price_usd: 300 },
+  { name: 'Intel Core i9-12900K', vendor: 'Intel', cores: 16, threads: 24, base_clock_mhz: 3200, boost_clock_mhz: 5200, l3_cache_mb: 30, tdp_watts: 125, architecture: 'Alder Lake', msrp_usd: 589, used_price_usd: 250 },
+  { name: 'Intel Core i7-12700K', vendor: 'Intel', cores: 12, threads: 20, base_clock_mhz: 3600, boost_clock_mhz: 5000, l3_cache_mb: 25, tdp_watts: 125, architecture: 'Alder Lake', msrp_usd: 409, used_price_usd: 180 },
+  { name: 'Intel Core i5-12600K', vendor: 'Intel', cores: 10, threads: 16, base_clock_mhz: 3700, boost_clock_mhz: 4900, l3_cache_mb: 20, tdp_watts: 125, architecture: 'Alder Lake', msrp_usd: 289, used_price_usd: 140 },
 
-  // Intel - Xeon
-  { name: 'Intel Xeon w9-3595X', vendor: 'Intel', cores: 56, threads: 112, base_clock_mhz: 2000, boost_clock_mhz: 4800, l3_cache_mb: 105, tdp_watts: 350, architecture: 'Sapphire Rapids', msrp_usd: 5889 },
-  { name: 'Intel Xeon w9-3495X', vendor: 'Intel', cores: 56, threads: 112, base_clock_mhz: 1900, boost_clock_mhz: 4800, l3_cache_mb: 105, tdp_watts: 350, architecture: 'Sapphire Rapids', msrp_usd: 5289 },
-  { name: 'Intel Xeon W-3475X', vendor: 'Intel', cores: 36, threads: 72, base_clock_mhz: 2200, boost_clock_mhz: 4800, l3_cache_mb: 52, tdp_watts: 300, architecture: 'Sapphire Rapids', msrp_usd: 3599 },
-  { name: 'Intel Xeon W-3465X', vendor: 'Intel', cores: 28, threads: 56, base_clock_mhz: 2500, boost_clock_mhz: 4800, l3_cache_mb: 45, tdp_watts: 270, architecture: 'Sapphire Rapids', msrp_usd: 2749 },
-  { name: 'Intel Xeon W-2495X', vendor: 'Intel', cores: 24, threads: 48, base_clock_mhz: 2500, boost_clock_mhz: 4800, l3_cache_mb: 45, tdp_watts: 225, architecture: 'Sapphire Rapids', msrp_usd: 2149 },
+  // Intel - Xeon - Used prices estimated Dec 2025
+  { name: 'Intel Xeon w9-3595X', vendor: 'Intel', cores: 56, threads: 112, base_clock_mhz: 2000, boost_clock_mhz: 4800, l3_cache_mb: 105, tdp_watts: 350, architecture: 'Sapphire Rapids', msrp_usd: 5889, used_price_usd: 4500 },
+  { name: 'Intel Xeon w9-3495X', vendor: 'Intel', cores: 56, threads: 112, base_clock_mhz: 1900, boost_clock_mhz: 4800, l3_cache_mb: 105, tdp_watts: 350, architecture: 'Sapphire Rapids', msrp_usd: 5289, used_price_usd: 4000 },
+  { name: 'Intel Xeon W-3475X', vendor: 'Intel', cores: 36, threads: 72, base_clock_mhz: 2200, boost_clock_mhz: 4800, l3_cache_mb: 52, tdp_watts: 300, architecture: 'Sapphire Rapids', msrp_usd: 3599, used_price_usd: 2800 },
+  { name: 'Intel Xeon W-3465X', vendor: 'Intel', cores: 28, threads: 56, base_clock_mhz: 2500, boost_clock_mhz: 4800, l3_cache_mb: 45, tdp_watts: 270, architecture: 'Sapphire Rapids', msrp_usd: 2749, used_price_usd: 2100 },
+  { name: 'Intel Xeon W-2495X', vendor: 'Intel', cores: 24, threads: 48, base_clock_mhz: 2500, boost_clock_mhz: 4800, l3_cache_mb: 45, tdp_watts: 225, architecture: 'Sapphire Rapids', msrp_usd: 2149, used_price_usd: 1600 },
 
-  // AMD - Ryzen 9000 Series
-  { name: 'AMD Ryzen 9 9950X', vendor: 'AMD', cores: 16, threads: 32, base_clock_mhz: 4300, boost_clock_mhz: 5700, l3_cache_mb: 64, tdp_watts: 170, architecture: 'Zen 5', msrp_usd: 649 },
-  { name: 'AMD Ryzen 9 9900X', vendor: 'AMD', cores: 12, threads: 24, base_clock_mhz: 4400, boost_clock_mhz: 5600, l3_cache_mb: 64, tdp_watts: 120, architecture: 'Zen 5', msrp_usd: 499 },
-  { name: 'AMD Ryzen 7 9700X', vendor: 'AMD', cores: 8, threads: 16, base_clock_mhz: 3800, boost_clock_mhz: 5500, l3_cache_mb: 32, tdp_watts: 65, architecture: 'Zen 5', msrp_usd: 359 },
-  { name: 'AMD Ryzen 5 9600X', vendor: 'AMD', cores: 6, threads: 12, base_clock_mhz: 3900, boost_clock_mhz: 5400, l3_cache_mb: 32, tdp_watts: 65, architecture: 'Zen 5', msrp_usd: 279 },
+  // AMD - Ryzen 9000 Series - Used prices from eBay Dec 2025
+  { name: 'AMD Ryzen 9 9950X', vendor: 'AMD', cores: 16, threads: 32, base_clock_mhz: 4300, boost_clock_mhz: 5700, l3_cache_mb: 64, tdp_watts: 170, architecture: 'Zen 5', msrp_usd: 649, used_price_usd: 500 },
+  { name: 'AMD Ryzen 9 9900X', vendor: 'AMD', cores: 12, threads: 24, base_clock_mhz: 4400, boost_clock_mhz: 5600, l3_cache_mb: 64, tdp_watts: 120, architecture: 'Zen 5', msrp_usd: 499, used_price_usd: 400 },
+  { name: 'AMD Ryzen 7 9700X', vendor: 'AMD', cores: 8, threads: 16, base_clock_mhz: 3800, boost_clock_mhz: 5500, l3_cache_mb: 32, tdp_watts: 65, architecture: 'Zen 5', msrp_usd: 359, used_price_usd: 280 },
+  { name: 'AMD Ryzen 5 9600X', vendor: 'AMD', cores: 6, threads: 12, base_clock_mhz: 3900, boost_clock_mhz: 5400, l3_cache_mb: 32, tdp_watts: 65, architecture: 'Zen 5', msrp_usd: 279, used_price_usd: 220 },
 
-  // AMD - Ryzen 7000 Series
-  { name: 'AMD Ryzen 9 7950X3D', vendor: 'AMD', cores: 16, threads: 32, base_clock_mhz: 4200, boost_clock_mhz: 5700, l3_cache_mb: 128, tdp_watts: 120, architecture: 'Zen 4', msrp_usd: 699 },
-  { name: 'AMD Ryzen 9 7950X', vendor: 'AMD', cores: 16, threads: 32, base_clock_mhz: 4500, boost_clock_mhz: 5700, l3_cache_mb: 64, tdp_watts: 170, architecture: 'Zen 4', msrp_usd: 699 },
-  { name: 'AMD Ryzen 9 7900X3D', vendor: 'AMD', cores: 12, threads: 24, base_clock_mhz: 4400, boost_clock_mhz: 5600, l3_cache_mb: 128, tdp_watts: 120, architecture: 'Zen 4', msrp_usd: 599 },
-  { name: 'AMD Ryzen 9 7900X', vendor: 'AMD', cores: 12, threads: 24, base_clock_mhz: 4700, boost_clock_mhz: 5600, l3_cache_mb: 64, tdp_watts: 170, architecture: 'Zen 4', msrp_usd: 549 },
-  { name: 'AMD Ryzen 7 7800X3D', vendor: 'AMD', cores: 8, threads: 16, base_clock_mhz: 4200, boost_clock_mhz: 5000, l3_cache_mb: 96, tdp_watts: 120, architecture: 'Zen 4', msrp_usd: 449 },
-  { name: 'AMD Ryzen 7 7700X', vendor: 'AMD', cores: 8, threads: 16, base_clock_mhz: 4500, boost_clock_mhz: 5400, l3_cache_mb: 32, tdp_watts: 105, architecture: 'Zen 4', msrp_usd: 399 },
-  { name: 'AMD Ryzen 5 7600X', vendor: 'AMD', cores: 6, threads: 12, base_clock_mhz: 4700, boost_clock_mhz: 5300, l3_cache_mb: 32, tdp_watts: 105, architecture: 'Zen 4', msrp_usd: 299 },
+  // AMD - Ryzen 7000 Series - Used prices from eBay Dec 2025
+  { name: 'AMD Ryzen 9 7950X3D', vendor: 'AMD', cores: 16, threads: 32, base_clock_mhz: 4200, boost_clock_mhz: 5700, l3_cache_mb: 128, tdp_watts: 120, architecture: 'Zen 4', msrp_usd: 699, used_price_usd: 500 },
+  { name: 'AMD Ryzen 9 7950X', vendor: 'AMD', cores: 16, threads: 32, base_clock_mhz: 4500, boost_clock_mhz: 5700, l3_cache_mb: 64, tdp_watts: 170, architecture: 'Zen 4', msrp_usd: 699, used_price_usd: 350 },
+  { name: 'AMD Ryzen 9 7900X3D', vendor: 'AMD', cores: 12, threads: 24, base_clock_mhz: 4400, boost_clock_mhz: 5600, l3_cache_mb: 128, tdp_watts: 120, architecture: 'Zen 4', msrp_usd: 599, used_price_usd: 400 },
+  { name: 'AMD Ryzen 9 7900X', vendor: 'AMD', cores: 12, threads: 24, base_clock_mhz: 4700, boost_clock_mhz: 5600, l3_cache_mb: 64, tdp_watts: 170, architecture: 'Zen 4', msrp_usd: 549, used_price_usd: 300 },
+  { name: 'AMD Ryzen 7 7800X3D', vendor: 'AMD', cores: 8, threads: 16, base_clock_mhz: 4200, boost_clock_mhz: 5000, l3_cache_mb: 96, tdp_watts: 120, architecture: 'Zen 4', msrp_usd: 449, used_price_usd: 350 },
+  { name: 'AMD Ryzen 7 7700X', vendor: 'AMD', cores: 8, threads: 16, base_clock_mhz: 4500, boost_clock_mhz: 5400, l3_cache_mb: 32, tdp_watts: 105, architecture: 'Zen 4', msrp_usd: 399, used_price_usd: 220 },
+  { name: 'AMD Ryzen 5 7600X', vendor: 'AMD', cores: 6, threads: 12, base_clock_mhz: 4700, boost_clock_mhz: 5300, l3_cache_mb: 32, tdp_watts: 105, architecture: 'Zen 4', msrp_usd: 299, used_price_usd: 160 },
 
-  // AMD - Ryzen 5000 Series
-  { name: 'AMD Ryzen 9 5950X', vendor: 'AMD', cores: 16, threads: 32, base_clock_mhz: 3400, boost_clock_mhz: 4900, l3_cache_mb: 64, tdp_watts: 105, architecture: 'Zen 3', msrp_usd: 799 },
-  { name: 'AMD Ryzen 9 5900X', vendor: 'AMD', cores: 12, threads: 24, base_clock_mhz: 3700, boost_clock_mhz: 4800, l3_cache_mb: 64, tdp_watts: 105, architecture: 'Zen 3', msrp_usd: 549 },
-  { name: 'AMD Ryzen 7 5800X3D', vendor: 'AMD', cores: 8, threads: 16, base_clock_mhz: 3400, boost_clock_mhz: 4500, l3_cache_mb: 96, tdp_watts: 105, architecture: 'Zen 3', msrp_usd: 449 },
-  { name: 'AMD Ryzen 7 5800X', vendor: 'AMD', cores: 8, threads: 16, base_clock_mhz: 3800, boost_clock_mhz: 4700, l3_cache_mb: 32, tdp_watts: 105, architecture: 'Zen 3', msrp_usd: 449 },
-  { name: 'AMD Ryzen 5 5600X', vendor: 'AMD', cores: 6, threads: 12, base_clock_mhz: 3700, boost_clock_mhz: 4600, l3_cache_mb: 32, tdp_watts: 65, architecture: 'Zen 3', msrp_usd: 299 },
+  // AMD - Ryzen 5000 Series - Used prices from eBay Dec 2025
+  { name: 'AMD Ryzen 9 5950X', vendor: 'AMD', cores: 16, threads: 32, base_clock_mhz: 3400, boost_clock_mhz: 4900, l3_cache_mb: 64, tdp_watts: 105, architecture: 'Zen 3', msrp_usd: 799, used_price_usd: 280 },
+  { name: 'AMD Ryzen 9 5900X', vendor: 'AMD', cores: 12, threads: 24, base_clock_mhz: 3700, boost_clock_mhz: 4800, l3_cache_mb: 64, tdp_watts: 105, architecture: 'Zen 3', msrp_usd: 549, used_price_usd: 180 },
+  { name: 'AMD Ryzen 7 5800X3D', vendor: 'AMD', cores: 8, threads: 16, base_clock_mhz: 3400, boost_clock_mhz: 4500, l3_cache_mb: 96, tdp_watts: 105, architecture: 'Zen 3', msrp_usd: 449, used_price_usd: 250 },
+  { name: 'AMD Ryzen 7 5800X', vendor: 'AMD', cores: 8, threads: 16, base_clock_mhz: 3800, boost_clock_mhz: 4700, l3_cache_mb: 32, tdp_watts: 105, architecture: 'Zen 3', msrp_usd: 449, used_price_usd: 140 },
+  { name: 'AMD Ryzen 5 5600X', vendor: 'AMD', cores: 6, threads: 12, base_clock_mhz: 3700, boost_clock_mhz: 4600, l3_cache_mb: 32, tdp_watts: 65, architecture: 'Zen 3', msrp_usd: 299, used_price_usd: 100 },
 
-  // AMD - Threadripper
-  { name: 'AMD Threadripper PRO 7995WX', vendor: 'AMD', cores: 96, threads: 192, base_clock_mhz: 2500, boost_clock_mhz: 5100, l3_cache_mb: 384, tdp_watts: 350, architecture: 'Zen 4', msrp_usd: 9999 },
-  { name: 'AMD Threadripper PRO 7985WX', vendor: 'AMD', cores: 64, threads: 128, base_clock_mhz: 3200, boost_clock_mhz: 5100, l3_cache_mb: 256, tdp_watts: 350, architecture: 'Zen 4', msrp_usd: 7099 },
-  { name: 'AMD Threadripper PRO 7975WX', vendor: 'AMD', cores: 32, threads: 64, base_clock_mhz: 4000, boost_clock_mhz: 5300, l3_cache_mb: 128, tdp_watts: 350, architecture: 'Zen 4', msrp_usd: 3299 },
-  { name: 'AMD Threadripper PRO 7965WX', vendor: 'AMD', cores: 24, threads: 48, base_clock_mhz: 4200, boost_clock_mhz: 5300, l3_cache_mb: 128, tdp_watts: 350, architecture: 'Zen 4', msrp_usd: 1899 },
-  { name: 'AMD Threadripper PRO 5995WX', vendor: 'AMD', cores: 64, threads: 128, base_clock_mhz: 2700, boost_clock_mhz: 4500, l3_cache_mb: 256, tdp_watts: 280, architecture: 'Zen 3', msrp_usd: 6499 },
-  { name: 'AMD Threadripper PRO 5975WX', vendor: 'AMD', cores: 32, threads: 64, base_clock_mhz: 3600, boost_clock_mhz: 4500, l3_cache_mb: 128, tdp_watts: 280, architecture: 'Zen 3', msrp_usd: 2899 },
+  // AMD - Threadripper - Used prices estimated Dec 2025
+  { name: 'AMD Threadripper PRO 7995WX', vendor: 'AMD', cores: 96, threads: 192, base_clock_mhz: 2500, boost_clock_mhz: 5100, l3_cache_mb: 384, tdp_watts: 350, architecture: 'Zen 4', msrp_usd: 9999, used_price_usd: 7500 },
+  { name: 'AMD Threadripper PRO 7985WX', vendor: 'AMD', cores: 64, threads: 128, base_clock_mhz: 3200, boost_clock_mhz: 5100, l3_cache_mb: 256, tdp_watts: 350, architecture: 'Zen 4', msrp_usd: 7099, used_price_usd: 5500 },
+  { name: 'AMD Threadripper PRO 7975WX', vendor: 'AMD', cores: 32, threads: 64, base_clock_mhz: 4000, boost_clock_mhz: 5300, l3_cache_mb: 128, tdp_watts: 350, architecture: 'Zen 4', msrp_usd: 3299, used_price_usd: 2500 },
+  { name: 'AMD Threadripper PRO 7965WX', vendor: 'AMD', cores: 24, threads: 48, base_clock_mhz: 4200, boost_clock_mhz: 5300, l3_cache_mb: 128, tdp_watts: 350, architecture: 'Zen 4', msrp_usd: 1899, used_price_usd: 1500 },
+  { name: 'AMD Threadripper PRO 5995WX', vendor: 'AMD', cores: 64, threads: 128, base_clock_mhz: 2700, boost_clock_mhz: 4500, l3_cache_mb: 256, tdp_watts: 280, architecture: 'Zen 3', msrp_usd: 6499, used_price_usd: 4000 },
+  { name: 'AMD Threadripper PRO 5975WX', vendor: 'AMD', cores: 32, threads: 64, base_clock_mhz: 3600, boost_clock_mhz: 4500, l3_cache_mb: 128, tdp_watts: 280, architecture: 'Zen 3', msrp_usd: 2899, used_price_usd: 1800 },
 
-  // AMD - EPYC
-  { name: 'AMD EPYC 9654', vendor: 'AMD', cores: 96, threads: 192, base_clock_mhz: 2400, boost_clock_mhz: 3700, l3_cache_mb: 384, tdp_watts: 360, architecture: 'Zen 4', msrp_usd: 11805 },
-  { name: 'AMD EPYC 9554', vendor: 'AMD', cores: 64, threads: 128, base_clock_mhz: 3100, boost_clock_mhz: 3750, l3_cache_mb: 256, tdp_watts: 360, architecture: 'Zen 4', msrp_usd: 4558 },
-  { name: 'AMD EPYC 9455P', vendor: 'AMD', cores: 48, threads: 96, base_clock_mhz: 2550, boost_clock_mhz: 3450, l3_cache_mb: 256, tdp_watts: 270, architecture: 'Zen 4', msrp_usd: 2375 },
-  { name: 'AMD EPYC 9454', vendor: 'AMD', cores: 48, threads: 96, base_clock_mhz: 2750, boost_clock_mhz: 3650, l3_cache_mb: 256, tdp_watts: 290, architecture: 'Zen 4', msrp_usd: 3411 },
-  { name: 'AMD EPYC 9354', vendor: 'AMD', cores: 32, threads: 64, base_clock_mhz: 3250, boost_clock_mhz: 3800, l3_cache_mb: 256, tdp_watts: 280, architecture: 'Zen 4', msrp_usd: 2730 },
+  // AMD - EPYC - Used prices estimated Dec 2025
+  { name: 'AMD EPYC 9654', vendor: 'AMD', cores: 96, threads: 192, base_clock_mhz: 2400, boost_clock_mhz: 3700, l3_cache_mb: 384, tdp_watts: 360, architecture: 'Zen 4', msrp_usd: 11805, used_price_usd: 9000 },
+  { name: 'AMD EPYC 9554', vendor: 'AMD', cores: 64, threads: 128, base_clock_mhz: 3100, boost_clock_mhz: 3750, l3_cache_mb: 256, tdp_watts: 360, architecture: 'Zen 4', msrp_usd: 4558, used_price_usd: 3500 },
+  { name: 'AMD EPYC 9455P', vendor: 'AMD', cores: 48, threads: 96, base_clock_mhz: 2550, boost_clock_mhz: 3450, l3_cache_mb: 256, tdp_watts: 270, architecture: 'Zen 4', msrp_usd: 2375, used_price_usd: 1800 },
+  { name: 'AMD EPYC 9454', vendor: 'AMD', cores: 48, threads: 96, base_clock_mhz: 2750, boost_clock_mhz: 3650, l3_cache_mb: 256, tdp_watts: 290, architecture: 'Zen 4', msrp_usd: 3411, used_price_usd: 2600 },
+  { name: 'AMD EPYC 9354', vendor: 'AMD', cores: 32, threads: 64, base_clock_mhz: 3250, boost_clock_mhz: 3800, l3_cache_mb: 256, tdp_watts: 280, architecture: 'Zen 4', msrp_usd: 2730, used_price_usd: 2000 },
 
-  // AMD Ryzen AI Max (Strix Halo APU - these are SoCs with integrated RDNA 3.5 graphics)
+  // AMD Ryzen AI Max (Strix Halo APU - these are SoCs with integrated RDNA 3.5 graphics) - Too new for used market
   { name: 'AMD Ryzen AI Max+ 395', vendor: 'AMD', cores: 16, threads: 32, base_clock_mhz: 2500, boost_clock_mhz: 5100, l3_cache_mb: 64, tdp_watts: 120, architecture: 'Zen 5', msrp_usd: 2999 },
   { name: 'AMD Ryzen AI Max 390', vendor: 'AMD', cores: 12, threads: 24, base_clock_mhz: 2500, boost_clock_mhz: 5000, l3_cache_mb: 64, tdp_watts: 120, architecture: 'Zen 5', msrp_usd: 2499 },
   { name: 'AMD Ryzen AI Max 385', vendor: 'AMD', cores: 8, threads: 16, base_clock_mhz: 2500, boost_clock_mhz: 4900, l3_cache_mb: 32, tdp_watts: 100, architecture: 'Zen 5', msrp_usd: 1999 },
 
-  // Apple Silicon
+  // Apple Silicon - Used prices from Swappa/eBay Dec 2025 (whole system prices)
   { name: 'Apple M4 Max', vendor: 'Apple', cores: 16, threads: 16, boost_clock_mhz: 4400, l3_cache_mb: 48, tdp_watts: 75, architecture: 'Apple Silicon', msrp_usd: 3199 },
   { name: 'Apple M4 Pro', vendor: 'Apple', cores: 14, threads: 14, boost_clock_mhz: 4400, l3_cache_mb: 36, tdp_watts: 60, architecture: 'Apple Silicon', msrp_usd: 1999 },
   { name: 'Apple M4', vendor: 'Apple', cores: 10, threads: 10, boost_clock_mhz: 4400, l3_cache_mb: 16, tdp_watts: 30, architecture: 'Apple Silicon', msrp_usd: 1299 },
-  { name: 'Apple M3 Ultra', vendor: 'Apple', cores: 24, threads: 24, boost_clock_mhz: 4050, l3_cache_mb: 72, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 4999 },
-  { name: 'Apple M3 Max', vendor: 'Apple', cores: 16, threads: 16, boost_clock_mhz: 4050, l3_cache_mb: 48, tdp_watts: 75, architecture: 'Apple Silicon', msrp_usd: 3199 },
-  { name: 'Apple M3 Pro', vendor: 'Apple', cores: 12, threads: 12, boost_clock_mhz: 4050, l3_cache_mb: 36, tdp_watts: 50, architecture: 'Apple Silicon', msrp_usd: 1999 },
-  { name: 'Apple M3', vendor: 'Apple', cores: 8, threads: 8, boost_clock_mhz: 4050, l3_cache_mb: 16, tdp_watts: 25, architecture: 'Apple Silicon', msrp_usd: 1299 },
-  { name: 'Apple M2 Ultra', vendor: 'Apple', cores: 24, threads: 24, boost_clock_mhz: 3500, l3_cache_mb: 72, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 4999 },
-  { name: 'Apple M2 Max', vendor: 'Apple', cores: 12, threads: 12, boost_clock_mhz: 3500, l3_cache_mb: 48, tdp_watts: 75, architecture: 'Apple Silicon', msrp_usd: 3099 },
-  { name: 'Apple M2 Pro', vendor: 'Apple', cores: 12, threads: 12, boost_clock_mhz: 3500, l3_cache_mb: 36, tdp_watts: 50, architecture: 'Apple Silicon', msrp_usd: 1999 },
-  { name: 'Apple M2', vendor: 'Apple', cores: 8, threads: 8, boost_clock_mhz: 3500, l3_cache_mb: 16, tdp_watts: 25, architecture: 'Apple Silicon', msrp_usd: 1199 },
-  { name: 'Apple M1 Ultra', vendor: 'Apple', cores: 20, threads: 20, boost_clock_mhz: 3200, l3_cache_mb: 48, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 3999 },
-  { name: 'Apple M1 Max', vendor: 'Apple', cores: 10, threads: 10, boost_clock_mhz: 3200, l3_cache_mb: 48, tdp_watts: 60, architecture: 'Apple Silicon', msrp_usd: 3099 },
-  { name: 'Apple M1 Pro', vendor: 'Apple', cores: 10, threads: 10, boost_clock_mhz: 3200, l3_cache_mb: 24, tdp_watts: 40, architecture: 'Apple Silicon', msrp_usd: 1999 },
-  { name: 'Apple M1', vendor: 'Apple', cores: 8, threads: 8, boost_clock_mhz: 3200, l3_cache_mb: 16, tdp_watts: 20, architecture: 'Apple Silicon', msrp_usd: 999 },
+  { name: 'Apple M3 Ultra', vendor: 'Apple', cores: 24, threads: 24, boost_clock_mhz: 4050, l3_cache_mb: 72, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 4999, used_price_usd: 4200 },
+  { name: 'Apple M3 Max', vendor: 'Apple', cores: 16, threads: 16, boost_clock_mhz: 4050, l3_cache_mb: 48, tdp_watts: 75, architecture: 'Apple Silicon', msrp_usd: 3199, used_price_usd: 2500 },
+  { name: 'Apple M3 Pro', vendor: 'Apple', cores: 12, threads: 12, boost_clock_mhz: 4050, l3_cache_mb: 36, tdp_watts: 50, architecture: 'Apple Silicon', msrp_usd: 1999, used_price_usd: 1500 },
+  { name: 'Apple M3', vendor: 'Apple', cores: 8, threads: 8, boost_clock_mhz: 4050, l3_cache_mb: 16, tdp_watts: 25, architecture: 'Apple Silicon', msrp_usd: 1299, used_price_usd: 1000 },
+  { name: 'Apple M2 Ultra', vendor: 'Apple', cores: 24, threads: 24, boost_clock_mhz: 3500, l3_cache_mb: 72, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 4999, used_price_usd: 4000 },
+  { name: 'Apple M2 Max', vendor: 'Apple', cores: 12, threads: 12, boost_clock_mhz: 3500, l3_cache_mb: 48, tdp_watts: 75, architecture: 'Apple Silicon', msrp_usd: 3099, used_price_usd: 1700 },
+  { name: 'Apple M2 Pro', vendor: 'Apple', cores: 12, threads: 12, boost_clock_mhz: 3500, l3_cache_mb: 36, tdp_watts: 50, architecture: 'Apple Silicon', msrp_usd: 1999, used_price_usd: 1400 },
+  { name: 'Apple M2', vendor: 'Apple', cores: 8, threads: 8, boost_clock_mhz: 3500, l3_cache_mb: 16, tdp_watts: 25, architecture: 'Apple Silicon', msrp_usd: 1199, used_price_usd: 900 },
+  { name: 'Apple M1 Ultra', vendor: 'Apple', cores: 20, threads: 20, boost_clock_mhz: 3200, l3_cache_mb: 48, tdp_watts: 100, architecture: 'Apple Silicon', msrp_usd: 3999, used_price_usd: 3000 },
+  { name: 'Apple M1 Max', vendor: 'Apple', cores: 10, threads: 10, boost_clock_mhz: 3200, l3_cache_mb: 48, tdp_watts: 60, architecture: 'Apple Silicon', msrp_usd: 3099, used_price_usd: 1500 },
+  { name: 'Apple M1 Pro', vendor: 'Apple', cores: 10, threads: 10, boost_clock_mhz: 3200, l3_cache_mb: 24, tdp_watts: 40, architecture: 'Apple Silicon', msrp_usd: 1999, used_price_usd: 1200 },
+  { name: 'Apple M1', vendor: 'Apple', cores: 8, threads: 8, boost_clock_mhz: 3200, l3_cache_mb: 16, tdp_watts: 20, architecture: 'Apple Silicon', msrp_usd: 999, used_price_usd: 700 },
 ]
 
 export const RAM_OPTIONS = [

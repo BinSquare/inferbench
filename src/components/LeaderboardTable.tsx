@@ -412,26 +412,46 @@ export function LeaderboardTable({ entries, isLoading }: LeaderboardTableProps) 
                         {/* GPU/SoC Cost & Value */}
                         <div>
                           <h4 className="text-xs font-semibold uppercase tracking-wide text-stone-400 mb-2">
-                            {entry.is_unified_soc ? 'SoC Cost (MSRP)' : 'GPU Cost (MSRP)'}
+                            {entry.is_unified_soc ? 'SoC Cost' : 'GPU Cost'}
                           </h4>
                           <div className="space-y-1 text-sm">
-                            {entry.gpu_msrp_usd != null ? (
+                            {(entry.gpu_msrp_usd != null || entry.gpu_used_price_usd != null) ? (
                               <>
-                                <div className="flex justify-between font-medium">
-                                  <span className="text-stone-700">{entry.is_unified_soc ? 'SoC:' : 'GPU:'}</span>
-                                  <span className="text-stone-900">{formatPrice(entry.gpu_msrp_usd)}</span>
-                                </div>
+                                {entry.gpu_msrp_usd != null && (
+                                  <div className="flex justify-between">
+                                    <span className="text-stone-500">MSRP:</span>
+                                    <span className="text-stone-900">{formatPrice(entry.gpu_msrp_usd)}</span>
+                                  </div>
+                                )}
+                                {entry.gpu_used_price_usd != null && (
+                                  <div className="flex justify-between">
+                                    <span className="text-stone-500">Used:</span>
+                                    <span className="text-stone-900">{formatPrice(entry.gpu_used_price_usd)}</span>
+                                  </div>
+                                )}
                                 {entry.is_unified_soc && (
                                   <div className="text-xs text-stone-400 italic">
                                     Includes CPU, GPU & unified memory
                                   </div>
                                 )}
-                                {entry.value_score != null && (
-                                  <div className="flex justify-between pt-2 border-t border-stone-200">
-                                    <span className="text-stone-500">Value:</span>
-                                    <span className="font-mono text-stone-900">
-                                      {formatNumber(entry.value_score, 3)} tok/s/$
-                                    </span>
+                                {(entry.value_score != null || entry.used_value_score != null) && (
+                                  <div className="pt-2 border-t border-stone-200 space-y-1">
+                                    {entry.value_score != null && (
+                                      <div className="flex justify-between">
+                                        <span className="text-stone-500">MSRP Value:</span>
+                                        <span className="font-mono text-stone-900">
+                                          {formatNumber(entry.value_score, 3)} tok/s/$
+                                        </span>
+                                      </div>
+                                    )}
+                                    {entry.used_value_score != null && (
+                                      <div className="flex justify-between">
+                                        <span className="text-stone-500">Used Value:</span>
+                                        <span className="font-mono text-green-600">
+                                          {formatNumber(entry.used_value_score, 3)} tok/s/$
+                                        </span>
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </>

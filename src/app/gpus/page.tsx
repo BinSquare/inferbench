@@ -9,7 +9,7 @@ import Link from 'next/link'
 
 export default function GPUsPage() {
   const [vendor, setVendor] = useState<string | null>(null)
-  const [sortBy, setSortBy] = useState<'performance' | 'value'>('performance')
+  const [sortBy, setSortBy] = useState<'performance' | 'value' | 'used_value'>('performance')
 
   const { data: gpus, isLoading } = useQuery({
     queryKey: ['gpus', vendor, sortBy],
@@ -36,9 +36,10 @@ export default function GPUsPage() {
             value={sortBy}
             options={[
               { label: 'Performance (tok/s)', value: 'performance' },
-              { label: 'Best Value (tok/s per $)', value: 'value' },
+              { label: 'MSRP Value (tok/s per $)', value: 'value' },
+              { label: 'Used Value (tok/s per $)', value: 'used_value' },
             ]}
-            onChange={(val) => setSortBy((val as 'performance' | 'value') || 'performance')}
+            onChange={(val) => setSortBy((val as 'performance' | 'value' | 'used_value') || 'performance')}
             placeholder="Performance"
           />
           <FilterDropdown
@@ -73,8 +74,9 @@ export default function GPUsPage() {
                 <th className="px-6 py-4 font-medium">Vendor</th>
                 <th className="px-6 py-4 font-medium">VRAM</th>
                 {sortBy === 'value' && <th className="px-6 py-4 font-medium">MSRP</th>}
+                {sortBy === 'used_value' && <th className="px-6 py-4 font-medium">Used Price</th>}
                 <th className="px-6 py-4 font-medium">Avg tok/s</th>
-                {sortBy === 'value' && <th className="px-6 py-4 font-medium">Value</th>}
+                {(sortBy === 'value' || sortBy === 'used_value') && <th className="px-6 py-4 font-medium">Value</th>}
               </tr>
             </thead>
             <tbody>
@@ -117,6 +119,11 @@ export default function GPUsPage() {
                       {gpu.msrp_usd ? `$${gpu.msrp_usd.toLocaleString()}` : '-'}
                     </td>
                   )}
+                  {sortBy === 'used_value' && (
+                    <td className="px-6 py-4 font-mono text-stone-600">
+                      {gpu.used_price_usd ? `$${gpu.used_price_usd.toLocaleString()}` : '-'}
+                    </td>
+                  )}
                   <td className="px-6 py-4 font-mono font-semibold text-stone-900">
                     {formatNumber(gpu.avg_tokens_per_second, 1)}
                   </td>
@@ -124,6 +131,12 @@ export default function GPUsPage() {
                     <td className="px-6 py-4 font-mono font-semibold text-green-600">
                       {gpu.value_score ? `${formatNumber(gpu.value_score, 3)}` : '-'}
                       {gpu.value_score && <span className="text-xs text-stone-400 ml-1">tok/s/$</span>}
+                    </td>
+                  )}
+                  {sortBy === 'used_value' && (
+                    <td className="px-6 py-4 font-mono font-semibold text-green-600">
+                      {gpu.used_value_score ? `${formatNumber(gpu.used_value_score, 3)}` : '-'}
+                      {gpu.used_value_score && <span className="text-xs text-stone-400 ml-1">tok/s/$</span>}
                     </td>
                   )}
                 </tr>

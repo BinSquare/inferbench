@@ -37,10 +37,14 @@ export interface LeaderboardEntry {
   // Cost breakdown
   is_unified_soc: boolean
   gpu_msrp_usd: number | null
+  gpu_used_price_usd: number | null
   cpu_msrp_usd: number | null
+  cpu_used_price_usd: number | null
   ram_cost_usd: number
   total_system_cost_usd: number | null
+  total_used_cost_usd: number | null
   value_score: number | null
+  used_value_score: number | null
 }
 
 export interface GPURanking {
@@ -52,7 +56,9 @@ export interface GPURanking {
   avg_tokens_per_second: number
   percentile: number
   msrp_usd: number | null
+  used_price_usd: number | null
   value_score: number | null // tok/s per $1
+  used_value_score: number | null // tok/s per $1 at used price
 }
 
 export interface CPURanking {
@@ -114,7 +120,7 @@ export async function fetchLeaderboard(params?: {
 
 export async function fetchGPURankings(params?: {
   vendor?: string
-  sort?: 'performance' | 'value'
+  sort?: 'performance' | 'value' | 'used_value'
   limit?: number
   offset?: number
 }): Promise<GPURanking[]> {
