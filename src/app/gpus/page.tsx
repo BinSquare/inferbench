@@ -18,7 +18,7 @@ export default function GPUsPage() {
   })
 
   const { data: models } = useQuery({
-    queryKey: ['models'],
+    queryKey: ['filter-models'],
     queryFn: fetchModels,
   })
 

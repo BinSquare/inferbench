@@ -30,7 +30,7 @@ export default function Home() {
   })
 
   const { data: models } = useQuery({
-    queryKey: ['models'],
+    queryKey: ['filter-models'],
     queryFn: fetchModels,
   })
 
