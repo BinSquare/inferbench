@@ -26,7 +26,8 @@ export function getRankBadgeClass(rank: number): string {
   return 'rank-other'
 }
 
-export function formatNumber(num: number, decimals = 2): string {
+export function formatNumber(num: number | null | undefined, decimals = 2): string {
+  if (num == null) return '-'
   if (num >= 1000000) {
     return (num / 1000000).toFixed(decimals) + 'M'
   }
@@ -36,7 +37,8 @@ export function formatNumber(num: number, decimals = 2): string {
   return num.toFixed(decimals)
 }
 
-export function formatVRAM(mb: number): string {
+export function formatVRAM(mb: number | null | undefined): string {
+  if (mb == null) return '-'
   if (mb >= 1024) {
     return (mb / 1024).toFixed(0) + ' GB'
   }

@@ -89,11 +89,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
 
     const vendor = searchParams.get('vendor')
+    const model = searchParams.get('model')
     const sortParam = searchParams.get('sort')
     const sortBy: SortOption = sortParam && VALID_SORT_OPTIONS.includes(sortParam as SortOption)
       ? (sortParam as SortOption)
       : 'performance'
     const { limit, offset } = parsePaginationParams(searchParams)
+
+    // Build where conditions
+    const whereConditions = [sql`${submissions.primaryGpuName} IS NOT NULL`]
+    if (model) {
+      whereConditions.push(sql`${submissions.model} = ${model}`)
+    }
 
     // Compute GPU stats directly from submissions table
     // This ensures we always have accurate, up-to-date data
@@ -105,7 +112,7 @@ export async function GET(request: NextRequest) {
         totalTokensPerSecond: sql<number>`sum(${submissions.tokensPerSecond})`,
       })
       .from(submissions)
-      .where(sql`${submissions.primaryGpuName} IS NOT NULL`)
+      .where(sql.join(whereConditions, sql` AND `))
       .groupBy(submissions.primaryGpuName)
 
     // Merge entries with aliased names into their canonical name
@@ -206,7 +213,12 @@ export async function GET(request: NextRequest) {
       percentile: Math.round(((totalGpus - (offset + index + 1)) / totalGpus) * 100),
     }))
 
-    return NextResponse.json(entries)
+    // Return with caching headers - GPU stats don't change frequently
+    return NextResponse.json(entries, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
+    })
   } catch (error) {
     console.error('API error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

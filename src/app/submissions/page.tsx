@@ -1,8 +1,10 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { ColumnDef } from '@tanstack/react-table'
+import { useState, useMemo, useCallback } from 'react'
 import { cn, formatNumber, timeAgo } from '@/lib/utils'
+import { DataTable, DataTableColumnHeader } from '@/components/ui'
 import Link from 'next/link'
 
 interface Submission {
@@ -141,20 +143,174 @@ export default function SubmissionsPage() {
     },
   })
 
-  const handleValidate = (id: string) => {
+  const handleValidate = useCallback((id: string) => {
     if (votedIds.has(id)) return
     voteMutation.mutate({ id, type: 'validate' })
-  }
+  }, [votedIds, voteMutation])
 
-  const handleQuestionClick = (id: string) => {
+  const handleQuestionClick = useCallback((id: string) => {
     if (votedIds.has(id)) return
     setQuestionModalId(id)
-  }
+  }, [votedIds])
 
   const handleQuestionSubmit = (reason: string) => {
     if (!questionModalId) return
     voteMutation.mutate({ id: questionModalId, type: 'question', reason })
   }
+
+  const columns: ColumnDef<Submission>[] = useMemo(
+    () => [
+      {
+        id: 'hardware',
+        accessorFn: (row) => row.primary_gpu_name || row.cpu_name,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Hardware" />
+        ),
+        cell: ({ row }) => (
+          <div className="space-y-1">
+            {row.original.primary_gpu_name ? (
+              <Link
+                href={`/gpu/${encodeURIComponent(row.original.primary_gpu_name)}`}
+                className="font-medium text-stone-900 hover:text-orange-600 transition-colors block"
+              >
+                {row.original.primary_gpu_name}
+              </Link>
+            ) : (
+              <span className="font-medium text-stone-900">CPU Only</span>
+            )}
+            <div className="text-xs text-stone-500">{row.original.cpu_name}</div>
+          </div>
+        ),
+        filterFn: 'includesString',
+      },
+      {
+        accessorKey: 'model',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Model" />
+        ),
+        cell: ({ row }) => (
+          <div className="flex items-center flex-wrap gap-1">
+            <span className="font-mono text-sm text-orange-600">
+              {row.original.model.split('/').pop()}
+            </span>
+            {row.original.quantization && (
+              <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-purple-50 text-purple-700">
+                {row.original.quantization}
+              </span>
+            )}
+            {row.original.context_length && (
+              <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-blue-50 text-blue-700">
+                {row.original.context_length.toLocaleString()} ctx
+              </span>
+            )}
+          </div>
+        ),
+        filterFn: 'includesString',
+      },
+      {
+        accessorKey: 'backend',
+        header: 'Backend',
+        cell: ({ row }) => (
+          <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-600">
+            {row.original.backend}
+          </span>
+        ),
+        filterFn: 'equals',
+      },
+      {
+        accessorKey: 'tokens_per_second',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Tokens/sec" />
+        ),
+        cell: ({ row }) => (
+          <span className="font-mono font-semibold text-stone-900">
+            {formatNumber(row.original.tokens_per_second, 1)}
+          </span>
+        ),
+        enableColumnFilter: false,
+      },
+      {
+        id: 'source',
+        accessorFn: (row) => row.source_url ? getSourceIcon(row.source_url) : 'Manual',
+        header: 'Source',
+        cell: ({ row }) =>
+          row.original.source_url ? (
+            <a
+              href={row.original.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+            >
+              {getSourceIcon(row.original.source_url)}
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          ) : (
+            <span className="text-xs text-stone-400">Manual</span>
+          ),
+        enableSorting: false,
+      },
+      {
+        accessorKey: 'created_at',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Submitted" />
+        ),
+        cell: ({ row }) => (
+          <span className="text-sm text-stone-500">{timeAgo(row.original.created_at)}</span>
+        ),
+        enableColumnFilter: false,
+      },
+      {
+        id: 'feedback',
+        header: () => <span className="text-center block">Feedback</span>,
+        cell: ({ row }) => {
+          const hasVoted = votedIds.has(row.original.id)
+          return (
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleValidate(row.original.id)
+                }}
+                disabled={hasVoted || voteMutation.isPending}
+                className={cn(
+                  'flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors',
+                  hasVoted
+                    ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                    : 'bg-green-50 text-green-700 hover:bg-green-100'
+                )}
+                title="This result looks accurate"
+              >
+                <span>✓</span>
+                <span>{row.original.validation_count}</span>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleQuestionClick(row.original.id)
+                }}
+                disabled={hasVoted || voteMutation.isPending}
+                className={cn(
+                  'flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors',
+                  hasVoted
+                    ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                    : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                )}
+                title="This result seems questionable"
+              >
+                <span>?</span>
+                <span>{row.original.question_count}</span>
+              </button>
+            </div>
+          )
+        },
+        enableSorting: false,
+        enableColumnFilter: false,
+      },
+    ],
+    [votedIds, voteMutation.isPending, handleValidate, handleQuestionClick]
+  )
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -177,145 +333,17 @@ export default function SubmissionsPage() {
         </div>
       </div>
 
-      <div className="card overflow-hidden">
-        {isLoading ? (
-          <div className="animate-pulse">
-            {[...Array(10)].map((_, i) => (
-              <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-stone-100">
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-stone-200 rounded w-1/3" />
-                  <div className="h-3 bg-stone-100 rounded w-1/2" />
-                </div>
-                <div className="w-24 h-6 bg-stone-200 rounded" />
-              </div>
-            ))}
-          </div>
-        ) : submissions && submissions.length > 0 ? (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-stone-200 text-left text-sm text-stone-500">
-                <th className="px-6 py-4 font-medium">Hardware</th>
-                <th className="px-6 py-4 font-medium">Model</th>
-                <th className="px-6 py-4 font-medium">Backend</th>
-                <th className="px-6 py-4 font-medium">Tokens/sec</th>
-                <th className="px-6 py-4 font-medium">Source</th>
-                <th className="px-6 py-4 font-medium">Submitted</th>
-                <th className="px-6 py-4 font-medium text-center">Feedback</th>
-              </tr>
-            </thead>
-            <tbody>
-              {submissions.map((sub) => {
-                const hasVoted = votedIds.has(sub.id)
-                return (
-                  <tr
-                    key={sub.id}
-                    className="border-b border-stone-100 hover:bg-stone-50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
-                        {sub.primary_gpu_name ? (
-                          <Link
-                            href={`/gpu/${encodeURIComponent(sub.primary_gpu_name)}`}
-                            className="font-medium text-stone-900 hover:text-orange-600 transition-colors block"
-                          >
-                            {sub.primary_gpu_name}
-                          </Link>
-                        ) : (
-                          <span className="font-medium text-stone-900">CPU Only</span>
-                        )}
-                        <div className="text-xs text-stone-500">{sub.cpu_name}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="font-mono text-sm text-orange-600">
-                        {sub.model.split('/').pop()}
-                      </span>
-                      {sub.quantization && (
-                        <span className="ml-2 px-1.5 py-0.5 text-xs font-medium rounded bg-purple-50 text-purple-700">
-                          {sub.quantization}
-                        </span>
-                      )}
-                      {sub.context_length && (
-                        <span className="ml-2 px-1.5 py-0.5 text-xs font-medium rounded bg-blue-50 text-blue-700">
-                          {sub.context_length.toLocaleString()} ctx
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-600">
-                        {sub.backend}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-mono font-semibold text-stone-900">
-                      {formatNumber(sub.tokens_per_second, 1)}
-                    </td>
-                    <td className="px-6 py-4">
-                      {sub.source_url ? (
-                        <a
-                          href={sub.source_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
-                        >
-                          {getSourceIcon(sub.source_url)}
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </a>
-                      ) : (
-                        <span className="text-xs text-stone-400">Manual</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-stone-500">
-                      {timeAgo(sub.created_at)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => handleValidate(sub.id)}
-                          disabled={hasVoted || voteMutation.isPending}
-                          className={cn(
-                            'flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors',
-                            hasVoted
-                              ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
-                              : 'bg-green-50 text-green-700 hover:bg-green-100'
-                          )}
-                          title="This result looks accurate"
-                        >
-                          <span>✓</span>
-                          <span>{sub.validation_count}</span>
-                        </button>
-                        <button
-                          onClick={() => handleQuestionClick(sub.id)}
-                          disabled={hasVoted || voteMutation.isPending}
-                          className={cn(
-                            'flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors',
-                            hasVoted
-                              ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
-                              : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-                          )}
-                          title="This result seems questionable"
-                        >
-                          <span>?</span>
-                          <span>{sub.question_count}</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        ) : (
-          <div className="p-12 text-center">
-            <div className="text-4xl mb-4">📊</div>
-            <h3 className="text-lg font-semibold text-stone-900 mb-2">No Submissions Yet</h3>
-            <p className="text-stone-500">
-              Be the first to submit a benchmark result!
-            </p>
-          </div>
-        )}
-      </div>
+      <DataTable
+        columns={columns}
+        data={submissions || []}
+        isLoading={isLoading}
+        enableGlobalFilter={true}
+        filterableColumns={['backend']}
+        defaultSorting={[{ id: 'created_at', desc: true }]}
+        emptyIcon="📊"
+        emptyTitle="No Submissions Yet"
+        emptyDescription="Be the first to submit a benchmark result!"
+      />
 
       {/* Info card */}
       <div className="mt-6 p-4 bg-stone-50 border border-stone-200 rounded-lg">

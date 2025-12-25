@@ -2,9 +2,14 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'next/navigation'
-import { fetchGPUDetail } from '@/lib/api'
+import { ColumnDef } from '@tanstack/react-table'
+import { useMemo } from 'react'
+import { fetchGPUDetail, GPUDetail } from '@/lib/api'
 import { cn, formatNumber, formatVRAM, timeAgo } from '@/lib/utils'
+import { DataTable, DataTableColumnHeader } from '@/components/ui'
 import Link from 'next/link'
+
+type GPUSubmission = NonNullable<GPUDetail['all_submissions']>[number]
 
 export default function GPUDetailPage() {
   const params = useParams()
@@ -14,6 +19,124 @@ export default function GPUDetailPage() {
     queryKey: ['gpu', name],
     queryFn: () => fetchGPUDetail(name),
   })
+
+  const columns: ColumnDef<GPUSubmission>[] = useMemo(
+    () => [
+      {
+        accessorKey: 'model',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Model" />
+        ),
+        cell: ({ row }) => (
+          <span className="font-mono text-sm text-orange-600">
+            {row.original.model.split('/').pop()}
+          </span>
+        ),
+        filterFn: 'includesString',
+      },
+      {
+        accessorKey: 'model_parameters_b',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Params" />
+        ),
+        cell: ({ row }) => (
+          <span className="text-sm text-stone-600">
+            {row.original.model_parameters_b ? `${row.original.model_parameters_b}B` : '-'}
+          </span>
+        ),
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: 'quantization',
+        header: 'Quantization',
+        cell: ({ row }) =>
+          row.original.quantization ? (
+            <span className="px-2 py-1 text-xs font-medium rounded bg-purple-50 text-purple-700">
+              {row.original.quantization}
+            </span>
+          ) : (
+            <span className="text-stone-400">-</span>
+          ),
+        filterFn: 'equals',
+      },
+      {
+        accessorKey: 'backend',
+        header: 'Backend',
+        cell: ({ row }) => (
+          <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-600">
+            {row.original.backend}
+          </span>
+        ),
+        filterFn: 'equals',
+      },
+      {
+        accessorKey: 'cpu_name',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="CPU" />
+        ),
+        cell: ({ row }) => (
+          <span
+            className="text-sm text-stone-600 max-w-[150px] truncate block"
+            title={row.original.cpu_name}
+          >
+            {row.original.cpu_name}
+          </span>
+        ),
+        filterFn: 'includesString',
+      },
+      {
+        accessorKey: 'context_length',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Context" />
+        ),
+        cell: ({ row }) => (
+          <span className="text-sm text-stone-600">
+            {row.original.context_length || '-'}
+          </span>
+        ),
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: 'tokens_per_second',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Tokens/sec" />
+        ),
+        cell: ({ row }) => (
+          <span className="font-mono font-semibold text-stone-900">
+            {formatNumber(row.original.tokens_per_second, 1)}
+          </span>
+        ),
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: 'prefill_tokens_per_second',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Prefill" />
+        ),
+        cell: ({ row }) => (
+          <span className="font-mono text-sm text-stone-600">
+            {row.original.prefill_tokens_per_second
+              ? formatNumber(row.original.prefill_tokens_per_second, 0)
+              : '-'}
+          </span>
+        ),
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: 'created_at',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Date" />
+        ),
+        cell: ({ row }) => (
+          <span className="text-sm text-stone-500">
+            {timeAgo(row.original.created_at)}
+          </span>
+        ),
+        enableColumnFilter: false,
+      },
+    ],
+    []
+  )
 
   if (isLoading) {
     return (
@@ -60,9 +183,8 @@ export default function GPUDetailPage() {
     Intel: 'text-blue-600',
   }
 
-  // Calculate stats from submissions
   const submissions = gpu.all_submissions || []
-  const tokensPerSecondValues = submissions.map((s: any) => s.tokens_per_second)
+  const tokensPerSecondValues = submissions.map((s) => s.tokens_per_second)
   const minTps = tokensPerSecondValues.length > 0 ? Math.min(...tokensPerSecondValues) : 0
   const maxTps = tokensPerSecondValues.length > 0 ? Math.max(...tokensPerSecondValues) : 0
 
@@ -144,84 +266,24 @@ export default function GPUDetailPage() {
         </div>
       </div>
 
-      {/* All Submissions - Supporting Data */}
-      <div className="card overflow-hidden">
-        <div className="px-6 py-4 border-b border-stone-200">
-          <h2 className="text-lg font-semibold text-stone-900">All Benchmark Data</h2>
-          <p className="text-sm text-stone-500 mt-1">
-            Complete data used to calculate the average ranking ({submissions.length} submissions)
-          </p>
-        </div>
-        {submissions.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-stone-200 text-left text-sm text-stone-500">
-                  <th className="px-6 py-3 font-medium">Model</th>
-                  <th className="px-6 py-3 font-medium">Params</th>
-                  <th className="px-6 py-3 font-medium">Quantization</th>
-                  <th className="px-6 py-3 font-medium">Backend</th>
-                  <th className="px-6 py-3 font-medium">CPU</th>
-                  <th className="px-6 py-3 font-medium">Context</th>
-                  <th className="px-6 py-3 font-medium">Tokens/sec</th>
-                  <th className="px-6 py-3 font-medium">Prefill</th>
-                  <th className="px-6 py-3 font-medium">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {submissions.map((sub: any) => (
-                  <tr
-                    key={sub.id}
-                    className="border-b border-stone-100 hover:bg-stone-50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <span className="font-mono text-sm text-orange-600">
-                        {sub.model.split('/').pop()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-stone-600">
-                      {sub.model_parameters_b ? `${sub.model_parameters_b}B` : '-'}
-                    </td>
-                    <td className="px-6 py-4">
-                      {sub.quantization ? (
-                        <span className="px-2 py-1 text-xs font-medium rounded bg-purple-50 text-purple-700">
-                          {sub.quantization}
-                        </span>
-                      ) : (
-                        <span className="text-stone-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-600">
-                        {sub.backend}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-stone-600 max-w-[150px] truncate" title={sub.cpu_name}>
-                      {sub.cpu_name}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-stone-600">
-                      {sub.context_length || '-'}
-                    </td>
-                    <td className="px-6 py-4 font-mono font-semibold text-stone-900">
-                      {formatNumber(sub.tokens_per_second, 1)}
-                    </td>
-                    <td className="px-6 py-4 font-mono text-sm text-stone-600">
-                      {sub.prefill_tokens_per_second ? formatNumber(sub.prefill_tokens_per_second, 0) : '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-stone-500">
-                      {timeAgo(sub.created_at)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="p-8 text-center text-stone-500">
-            No benchmarks submitted yet
-          </div>
-        )}
+      {/* All Submissions */}
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-stone-900">All Benchmark Data</h2>
+        <p className="text-sm text-stone-500 mt-1">
+          Complete data used to calculate the average ranking ({submissions.length} submissions)
+        </p>
       </div>
+
+      <DataTable
+        columns={columns}
+        data={submissions}
+        enableGlobalFilter={true}
+        filterableColumns={['backend', 'quantization']}
+        defaultSorting={[{ id: 'tokens_per_second', desc: true }]}
+        emptyIcon="📊"
+        emptyTitle="No Benchmarks"
+        emptyDescription="No benchmarks submitted yet for this GPU."
+      />
     </div>
   )
 }

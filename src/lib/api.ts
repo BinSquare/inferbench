@@ -120,12 +120,14 @@ export async function fetchLeaderboard(params?: {
 
 export async function fetchGPURankings(params?: {
   vendor?: string
+  model?: string
   sort?: 'performance' | 'value' | 'used_value'
   limit?: number
   offset?: number
 }): Promise<GPURanking[]> {
   const searchParams = new URLSearchParams()
   if (params?.vendor) searchParams.set('vendor', params.vendor)
+  if (params?.model) searchParams.set('model', params.model)
   if (params?.sort) searchParams.set('sort', params.sort)
   if (params?.limit) searchParams.set('limit', params.limit.toString())
   if (params?.offset) searchParams.set('offset', params.offset.toString())
