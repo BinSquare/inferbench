@@ -1,8 +1,8 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
-import { fetchGPURankings, compareGPUs } from '@/lib/api'
+import { useQuery, useQueries } from '@tanstack/react-query'
+import { useState, useMemo } from 'react'
+import { fetchGPURankings, compareGPUs, fetchGPUDetail, GPUDetail } from '@/lib/api'
 import { cn, formatNumber, formatVRAM } from '@/lib/utils'
 
 export default function ComparePage() {
@@ -19,6 +19,80 @@ export default function ComparePage() {
     queryFn: () => compareGPUs(selectedGPUs),
     enabled: selectedGPUs.length >= 2,
   })
+
+  // Fetch detailed submissions for each GPU to find common models
+  const gpuDetailQueries = useQueries({
+    queries: selectedGPUs.map((gpuName) => ({
+      queryKey: ['gpu-detail', gpuName],
+      queryFn: () => fetchGPUDetail(gpuName),
+      enabled: selectedGPUs.length >= 2,
+    })),
+  })
+
+  // Find common models and compute per-model performance
+  const perModelComparison = useMemo(() => {
+    if (selectedGPUs.length < 2) return null
+
+    const gpuDetails = gpuDetailQueries
+      .map((q) => q.data)
+      .filter((d): d is GPUDetail => !!d && !('error' in d) && !!d.all_submissions)
+
+    if (gpuDetails.length !== selectedGPUs.length) return null
+
+    // Build a map of model -> GPU -> avg tokens/s
+    const modelPerformance = new Map<string, Map<string, { total: number; count: number }>>()
+
+    for (const gpuDetail of gpuDetails) {
+      for (const submission of gpuDetail.all_submissions) {
+        if (!submission.model) continue
+
+        if (!modelPerformance.has(submission.model)) {
+          modelPerformance.set(submission.model, new Map())
+        }
+
+        const gpuMap = modelPerformance.get(submission.model)!
+        const existing = gpuMap.get(gpuDetail.name) || { total: 0, count: 0 }
+        gpuMap.set(gpuDetail.name, {
+          total: existing.total + submission.tokens_per_second,
+          count: existing.count + 1,
+        })
+      }
+    }
+
+    // Filter to only models that all selected GPUs have benchmarked
+    const commonModels: Array<{
+      model: string
+      displayName: string
+      performances: Map<string, number>
+      maxTps: number
+    }> = []
+
+    Array.from(modelPerformance.entries()).forEach(([model, gpuMap]) => {
+      // Check if all selected GPUs have this model
+      if (gpuMap.size === selectedGPUs.length) {
+        const performances = new Map<string, number>()
+        let maxTps = 0
+
+        Array.from(gpuMap.entries()).forEach(([gpuName, stats]) => {
+          const avgTps = stats.total / stats.count
+          performances.set(gpuName, avgTps)
+          maxTps = Math.max(maxTps, avgTps)
+        })
+
+        commonModels.push({
+          model,
+          displayName: model.split('/').pop()?.replace(/-/g, ' ') || model,
+          performances,
+          maxTps,
+        })
+      }
+    })
+
+    // Sort by model name
+    commonModels.sort((a, b) => a.displayName.localeCompare(b.displayName))
+
+    return commonModels
+  }, [selectedGPUs, gpuDetailQueries])
 
   const filteredGPUs = allGPUs?.filter(
     (gpu) =>
@@ -200,7 +274,7 @@ export default function ComparePage() {
                         </td>
                       ))}
                     </tr>
-                    <tr>
+                    <tr className="border-b border-stone-100">
                       <td className="px-6 py-4 text-stone-500">Avg tok/s</td>
                       {comparison.comparisons.map((gpu: any) => (
                         <td
@@ -211,9 +285,102 @@ export default function ComparePage() {
                         </td>
                       ))}
                     </tr>
+                    <tr className="border-b border-stone-100 bg-stone-50">
+                      <td className="px-6 py-4 text-stone-500 font-medium" colSpan={comparison.comparisons.length + 1}>
+                        Pricing
+                      </td>
+                    </tr>
+                    <tr className="border-b border-stone-100">
+                      <td className="px-6 py-4 text-stone-500">MSRP</td>
+                      {comparison.comparisons.map((gpu: any) => (
+                        <td key={gpu.name} className="px-6 py-4 font-mono text-stone-900">
+                          {gpu.msrp_usd ? `$${gpu.msrp_usd.toLocaleString()}` : '-'}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-stone-100">
+                      <td className="px-6 py-4 text-stone-500">Used Price</td>
+                      {comparison.comparisons.map((gpu: any) => (
+                        <td key={gpu.name} className="px-6 py-4 font-mono text-stone-900">
+                          {gpu.used_price_usd ? `$${gpu.used_price_usd.toLocaleString()}` : '-'}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-stone-100">
+                      <td className="px-6 py-4 text-stone-500">MSRP Value</td>
+                      {comparison.comparisons.map((gpu: any) => (
+                        <td key={gpu.name} className="px-6 py-4 font-mono text-stone-600">
+                          {gpu.value_score ? `${formatNumber(gpu.value_score, 3)} tok/s/$` : '-'}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 text-stone-500">Used Value</td>
+                      {comparison.comparisons.map((gpu: any) => (
+                        <td key={gpu.name} className="px-6 py-4 font-mono font-semibold text-green-600">
+                          {gpu.used_value_score ? `${formatNumber(gpu.used_value_score, 3)} tok/s/$` : '-'}
+                        </td>
+                      ))}
+                    </tr>
                   </tbody>
                 </table>
               </div>
+
+              {/* Per-Model Performance Comparison */}
+              {perModelComparison && perModelComparison.length > 0 && (
+                <div className="card p-6">
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-stone-500 mb-6">
+                    Performance by Model ({perModelComparison.length} common model{perModelComparison.length !== 1 ? 's' : ''})
+                  </h3>
+                  <div className="space-y-6">
+                    {perModelComparison.map((modelData) => (
+                      <div key={modelData.model}>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-medium text-stone-900 text-sm">{modelData.displayName}</span>
+                          <span className="text-xs text-stone-400 font-mono truncate ml-2 max-w-[200px]">
+                            {modelData.model}
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {selectedGPUs.map((gpuName, index) => {
+                            const tps = modelData.performances.get(gpuName) || 0
+                            return (
+                              <div key={gpuName} className="flex items-center gap-3">
+                                <span className="text-xs text-stone-500 w-32 truncate" title={gpuName}>
+                                  {gpuName.split(' ').slice(-2).join(' ')}
+                                </span>
+                                <div className="flex-1 h-5 bg-stone-100 rounded overflow-hidden">
+                                  <div
+                                    className={cn(
+                                      'h-full rounded transition-all duration-500',
+                                      barColors[index] || 'bg-stone-300'
+                                    )}
+                                    style={{ width: `${(tps / modelData.maxTps) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="font-mono text-xs text-stone-700 w-20 text-right">
+                                  {formatNumber(tps, 1)} tok/s
+                                </span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* No common models message */}
+              {perModelComparison && perModelComparison.length === 0 && (
+                <div className="card p-6 text-center">
+                  <div className="text-2xl mb-2">📊</div>
+                  <h3 className="text-sm font-semibold text-stone-900 mb-1">No Common Models</h3>
+                  <p className="text-sm text-stone-500">
+                    These GPUs don't have benchmark data for the same models yet.
+                  </p>
+                </div>
+              )}
             </div>
           ) : null}
         </div>

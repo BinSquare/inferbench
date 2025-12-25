@@ -380,14 +380,19 @@ export function LeaderboardTable({ entries, isLoading }: LeaderboardTableProps) 
   const columns: ColumnDef<LeaderboardEntry>[] = useMemo(
     () => [
       {
-        accessorKey: 'rank',
-        header: 'Rank',
-        cell: ({ row }) => (
-          <span className={cn('rank-badge', getRankBadgeClass(row.original.rank))}>
-            {row.original.rank}
-          </span>
-        ),
+        id: 'rank',
+        header: '#',
+        cell: ({ row, table }) => {
+          const sortedRows = table.getRowModel().rows
+          const visualIndex = sortedRows.findIndex(r => r.id === row.id) + 1
+          return (
+            <span className={cn('rank-badge', getRankBadgeClass(visualIndex))}>
+              {visualIndex}
+            </span>
+          )
+        },
         enableColumnFilter: false,
+        enableSorting: false,
       },
       {
         id: 'hardware',

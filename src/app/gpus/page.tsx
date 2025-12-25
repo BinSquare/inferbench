@@ -25,14 +25,19 @@ export default function GPUsPage() {
   const columns: ColumnDef<GPURanking>[] = useMemo(
     () => [
       {
-        accessorKey: 'rank',
-        header: 'Rank',
-        cell: ({ row }) => (
-          <span className={cn('rank-badge', getRankBadgeClass(row.original.rank))}>
-            {row.original.rank}
-          </span>
-        ),
+        id: 'rank',
+        header: '#',
+        cell: ({ row, table }) => {
+          const sortedRows = table.getRowModel().rows
+          const visualIndex = sortedRows.findIndex(r => r.id === row.id) + 1
+          return (
+            <span className={cn('rank-badge', getRankBadgeClass(visualIndex))}>
+              {visualIndex}
+            </span>
+          )
+        },
         enableColumnFilter: false,
+        enableSorting: false,
       },
       {
         accessorKey: 'name',
@@ -118,13 +123,32 @@ export default function GPUsPage() {
       {
         accessorKey: 'value_score',
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Value" />
+          <DataTableColumnHeader column={column} title="MSRP Value" />
         ),
         cell: ({ row }) => (
-          <span className="font-mono font-semibold text-green-600">
+          <span className="font-mono font-semibold text-stone-600">
             {row.original.value_score ? (
               <>
                 {formatNumber(row.original.value_score, 3)}
+                <span className="text-xs text-stone-400 ml-1">tok/s/$</span>
+              </>
+            ) : (
+              '-'
+            )}
+          </span>
+        ),
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: 'used_value_score',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Used Value" />
+        ),
+        cell: ({ row }) => (
+          <span className="font-mono font-semibold text-green-600">
+            {row.original.used_value_score ? (
+              <>
+                {formatNumber(row.original.used_value_score, 3)}
                 <span className="text-xs text-stone-400 ml-1">tok/s/$</span>
               </>
             ) : (
