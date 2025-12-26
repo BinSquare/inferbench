@@ -1,9 +1,11 @@
-import { db, submissions, submissionGpus } from '@/db'
+import { db, submissions, submissionGpus, submissionQuestions } from '@/db'
 import { NextRequest, NextResponse } from 'next/server'
 import {
   submissionPayloadSchema,
   validateRequestBody,
 } from '@/lib/validation'
+import { checkVramPlausibility } from '@/lib/plausibility'
+import { getModelParametersB } from '@/lib/hardware-data'
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +26,22 @@ export async function POST(request: NextRequest) {
     const totalGpuCount = gpuList.reduce((sum, gpu) => sum + gpu.quantity, 0)
     const totalVramMb = gpuList.reduce((sum, gpu) => sum + (gpu.vram_mb * gpu.quantity), 0)
     const primaryGpuName = gpuList.length > 0 ? gpuList[0].name : null
+
+    // Check plausibility of VRAM requirements
+    let plausibilityWarning: string | null = null
+    const modelParametersB = payload.benchmark.model_parameters_b ?? getModelParametersB(payload.benchmark.model)
+
+    if (modelParametersB && totalVramMb > 0) {
+      const plausibility = checkVramPlausibility(
+        totalVramMb,
+        modelParametersB,
+        payload.benchmark.quantization ?? null
+      )
+
+      if (!plausibility.plausible) {
+        plausibilityWarning = plausibility.reason
+      }
+    }
 
     // Insert submission
     const [submission] = await db.insert(submissions).values({
@@ -73,6 +91,9 @@ export async function POST(request: NextRequest) {
       // Metadata
       submitterNotes: payload.metadata?.notes || null,
       sourceUrl: payload.source_url || null,
+
+      // Set questionCount if plausibility warning
+      questionCount: plausibilityWarning ? 1 : 0,
     }).returning()
 
     // Insert GPU entries into junction table
@@ -89,11 +110,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Insert plausibility warning as a question if flagged
+    if (plausibilityWarning) {
+      await db.insert(submissionQuestions).values({
+        submissionId: submission.id,
+        reason: `[Auto-flagged] ${plausibilityWarning}`,
+      })
+    }
+
     return NextResponse.json({
       success: true,
       submission_id: submission.id,
       total_gpu_count: totalGpuCount,
       total_vram_mb: totalVramMb,
+      flagged: plausibilityWarning !== null,
+      flag_reason: plausibilityWarning,
     })
   } catch (error) {
     console.error('API error:', error)

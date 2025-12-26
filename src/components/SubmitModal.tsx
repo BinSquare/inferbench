@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
-import { GPU_LIST, CPU_LIST, RAM_OPTIONS, MODEL_LIST, BACKEND_LIST, OS_LIST } from '@/lib/hardware-data'
+import { GPU_LIST, CPU_LIST, RAM_OPTIONS, MODEL_LIST, BACKEND_LIST, OS_LIST, getModelParametersB } from '@/lib/hardware-data'
 import { submitBenchmark } from '@/lib/api'
+import { checkVramPlausibility } from '@/lib/plausibility'
 
 interface SubmitModalProps {
   isOpen: boolean
@@ -58,6 +59,34 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
     CPU_LIST.find(c => c.name === formData.cpuName),
     [formData.cpuName]
   )
+
+  // Calculate total VRAM from selected GPUs
+  const totalVramMb = useMemo(() => {
+    return gpuEntries
+      .filter(entry => entry.name)
+      .reduce((sum, entry) => {
+        const gpuSpec = GPU_LIST.find(g => g.name === entry.name)
+        return sum + (gpuSpec ? gpuSpec.vram_mb * entry.quantity : 0)
+      }, 0)
+  }, [gpuEntries])
+
+  // Check plausibility of the submission
+  const plausibilityCheck = useMemo(() => {
+    if (!formData.model || totalVramMb === 0) {
+      return null // Not enough info to check
+    }
+
+    const modelParametersB = getModelParametersB(formData.model)
+    if (!modelParametersB) {
+      return null // Model not found in list
+    }
+
+    return checkVramPlausibility(
+      totalVramMb,
+      modelParametersB,
+      formData.quantization || null
+    )
+  }, [formData.model, formData.quantization, totalVramMb])
 
   // Validation: at least one GPU or CPU required
   const hasHardware = gpuEntries.length > 0 || formData.cpuName !== ''
@@ -583,6 +612,50 @@ export function SubmitModal({ isOpen, onClose }: SubmitModalProps) {
                   {submitError && (
                     <div className="p-4 bg-red-50 border border-red-200 rounded-md">
                       <p className="text-sm text-red-700">{submitError}</p>
+                    </div>
+                  )}
+
+                  {/* Plausibility Warning */}
+                  {plausibilityCheck && !plausibilityCheck.plausible && (
+                    <div className={cn(
+                      "p-4 rounded-md border",
+                      plausibilityCheck.warningLevel === 'very_unlikely'
+                        ? "bg-orange-50 border-orange-300"
+                        : "bg-amber-50 border-amber-200"
+                    )}>
+                      <div className="flex gap-3">
+                        <svg className={cn(
+                          "w-5 h-5 flex-shrink-0 mt-0.5",
+                          plausibilityCheck.warningLevel === 'very_unlikely'
+                            ? "text-orange-500"
+                            : "text-amber-500"
+                        )} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                          <p className={cn(
+                            "text-sm font-medium",
+                            plausibilityCheck.warningLevel === 'very_unlikely'
+                              ? "text-orange-800"
+                              : "text-amber-800"
+                          )}>
+                            {plausibilityCheck.warningLevel === 'very_unlikely'
+                              ? "This configuration seems unlikely"
+                              : "VRAM may be insufficient"}
+                          </p>
+                          <p className={cn(
+                            "text-sm mt-1",
+                            plausibilityCheck.warningLevel === 'very_unlikely'
+                              ? "text-orange-700"
+                              : "text-amber-700"
+                          )}>
+                            {plausibilityCheck.reason}
+                          </p>
+                          <p className="text-xs mt-2 text-stone-500">
+                            You can still submit, but your result will be flagged for review.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
 

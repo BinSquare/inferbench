@@ -466,3 +466,14 @@ export interface GpuFormEntry {
   quantity: number
   interconnect?: string
 }
+
+/**
+ * Look up model parameters (in billions) by model name/ID
+ * Returns null if model is not found in the list
+ */
+export function getModelParametersB(modelName: string): number | null {
+  const model = MODEL_LIST.find(
+    (m) => m.name === modelName || m.name.toLowerCase() === modelName.toLowerCase()
+  )
+  return model?.parameters_b ?? null
+}
